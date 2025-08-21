@@ -383,6 +383,10 @@
         <div class="balance-section" id="balanceSection" style="display: none;">
             <div class="balance-title">Your MONS Balance</div>
             <div class="balance-value" id="userBalance">0</div>
+            <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8; text-align: center;">
+                Need more MONS? Mint directly from the 
+                <a href="#" style="color: #00d4ff;" onclick="openMintInfo()">MON-20 Contract</a>
+            </p>
         </div>
 
         <section id="marketplace">
@@ -690,12 +694,27 @@
                 }
                 
                 const formattedBalance = ethers.formatEther(balance);
+                const numericBalance = Number(formattedBalance);
                 
-                document.getElementById('userBalance').textContent = 
-                    Number(formattedBalance).toLocaleString();
+                // Show balance with appropriate decimal places
+                let displayBalance;
+                if (numericBalance === 0) {
+                    displayBalance = "0";
+                } else if (numericBalance < 0.000001) {
+                    displayBalance = numericBalance.toFixed(12); // Show more decimals for very small amounts
+                } else if (numericBalance < 1) {
+                    displayBalance = numericBalance.toFixed(6);
+                } else {
+                    displayBalance = numericBalance.toLocaleString();
+                }
+                
+                document.getElementById('userBalance').textContent = displayBalance;
                 document.getElementById('balanceSection').style.display = 'block';
                 
-                console.log('User MONS balance:', formattedBalance);
+                // Store balance for use in other functions
+                window.userMonsBalance = balance;
+                
+                console.log('User MONS balance:', formattedBalance, 'Raw:', balance.toString());
                 
             } catch (error) {
                 console.error('Error loading balance:', error);
@@ -1084,30 +1103,37 @@
             
             try {
                 // Check if user has enough MONS balance
-                let userBalance = 0;
+                let userBalance = window.userMonsBalance || 0;
                 const amountWei = ethers.parseEther(amount);
                 
-                try {
-                    // Try multiple methods to check balance
-                    const readProvider = new ethers.JsonRpcProvider(MONAD_TESTNET.rpc);
-                    const readTokenContract = new ethers.Contract(TOKEN_ADDRESS, MON20_ABI, readProvider);
-                    
+                // If we don't have stored balance, try to fetch it
+                if (!userBalance) {
                     try {
-                        userBalance = await readTokenContract.getBalance(userAccount, "MONS");
-                    } catch (e1) {
+                        const readProvider = new ethers.JsonRpcProvider(MONAD_TESTNET.rpc);
+                        const readTokenContract = new ethers.Contract(TOKEN_ADDRESS, MON20_ABI, readProvider);
+                        
                         try {
-                            userBalance = await readTokenContract.balances(userAccount, "MONS");
-                        } catch (e2) {
-                            userBalance = await marketplaceContract.balanceOf(userAccount, "MONS");
+                            userBalance = await readTokenContract.getBalance(userAccount, "MONS");
+                        } catch (e1) {
+                            try {
+                                userBalance = await readTokenContract.balances(userAccount, "MONS");
+                            } catch (e2) {
+                                userBalance = await marketplaceContract.balanceOf(userAccount, "MONS");
+                            }
                         }
+                    } catch (e) {
+                        console.error('Could not check balance:', e);
                     }
-                } catch (e) {
-                    console.error('Could not check balance:', e);
-                    // Continue anyway, let the contract handle the validation
                 }
                 
                 if (userBalance > 0 && userBalance < amountWei) {
-                    alert(`Insufficient MONS balance. You have ${ethers.formatEther(userBalance)} MONS`);
+                    const balanceFormatted = ethers.formatEther(userBalance);
+                    alert(`Insufficient MONS balance!\n\nYou have: ${balanceFormatted} MONS\nYou need: ${amount} MONS\n\nPlease reduce the amount or mint more MONS tokens.`);
+                    return;
+                }
+                
+                if (userBalance == 0) {
+                    alert('You have no MONS tokens to list!\n\nPlease mint some MONS tokens first from the inscription contract.');
                     return;
                 }
                 
@@ -1174,6 +1200,11 @@
             } catch (error) {
                 console.error('Error setting up event listeners:', error);
             }
+        }
+
+        // Add mint info function
+        function openMintInfo() {
+            alert(`To mint MONS tokens:\n\n1. Go to MON-20 Contract: 0x07169f0F890C3595421512D98DC79b8bce6E5fA6\n2. Call mint() function with:\n   - tick: "MONS"\n   - amount: 1000 (or less)\n   - Send 0.001 MON as fee\n\n3. Wait for confirmation\n4. Refresh this page to see your balance\n\nMax per mint: 1000 MONS\nMint fee: 0.001 MON`);
         }
 
         // Enhanced wallet connection with event listeners
