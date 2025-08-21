@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MON-20 Marketplace | Monad Testnet</title>
+    <title>MON-20 Marketplace - First Inscription Protocol on MONAD</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
     <style>
         * {
@@ -13,57 +13,38 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
             color: #ffffff;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* Header */
         .header {
             background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 0;
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
         .nav {
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 0;
+            padding: 0 2rem;
         }
 
         .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(45deg, #00f5ff, #0080ff);
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00d4ff, #ff6b6b);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-        }
-
-        .logo::before {
-            content: "⧫";
-            color: #00f5ff;
-            font-size: 1.8rem;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from { text-shadow: 0 0 10px #00f5ff; }
-            to { text-shadow: 0 0 20px #00f5ff, 0 0 30px #0080ff; }
+            background-clip: text;
         }
 
         .nav-links {
@@ -75,614 +56,413 @@
         .nav-links a {
             color: #ffffff;
             text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            position: relative;
+            transition: color 0.3s;
         }
 
         .nav-links a:hover {
-            color: #00f5ff;
+            color: #00d4ff;
         }
 
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background: linear-gradient(45deg, #00f5ff, #0080ff);
-            transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .wallet-btn {
-            background: linear-gradient(45deg, #00f5ff, #0080ff);
+        .connect-wallet {
+            padding: 0.7rem 1.5rem;
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
             border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 10px;
+            border-radius: 25px;
             color: white;
-            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 245, 255, 0.3);
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
 
-        .wallet-btn:hover {
+        .connect-wallet:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 245, 255, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
         }
 
-        /* Hero Section */
         .hero {
-            padding: 4rem 0;
             text-align: center;
-            position: relative;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 30% 40%, rgba(0, 245, 255, 0.1) 0%, transparent 50%);
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
+            font-size: 3rem;
             margin-bottom: 1rem;
-            background: linear-gradient(45deg, #ffffff, #00f5ff, #0080ff);
+            background: linear-gradient(45deg, #00d4ff, #ff6b6b, #4ecdc4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            line-height: 1.2;
+            background-clip: text;
         }
 
         .hero p {
-            font-size: 1.3rem;
-            color: #b0b0b0;
+            font-size: 1.2rem;
+            opacity: 0.8;
             margin-bottom: 2rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
         }
 
-        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 2rem;
-            margin: 3rem 0;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
         }
 
         .stat-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 15px;
             padding: 2rem;
             text-align: center;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(45deg, #00f5ff, #0080ff);
+            transition: transform 0.3s, box-shadow 0.3s;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
-            border-color: rgba(0, 245, 255, 0.3);
-            box-shadow: 0 10px 30px rgba(0, 245, 255, 0.2);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.2);
         }
 
         .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #00f5ff;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00d4ff;
             margin-bottom: 0.5rem;
         }
 
         .stat-label {
-            color: #b0b0b0;
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Main Content */
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 3rem;
-            margin: 4rem 0;
-        }
-
-        .marketplace-section {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 2rem;
-            backdrop-filter: blur(10px);
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .section-title {
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: #ffffff;
-        }
-
-        .filter-tabs {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .tab-btn {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #b0b0b0;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .tab-btn.active {
-            background: linear-gradient(45deg, #00f5ff, #0080ff);
-            color: white;
-            border-color: transparent;
-        }
-
-        /* Listings */
-        .listings-container {
-            display: grid;
-            gap: 1rem;
-            max-height: 600px;
-            overflow-y: auto;
-        }
-
-        .listing-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .listing-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(0, 245, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .listing-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .listing-ticker {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #00f5ff;
-        }
-
-        .listing-amount {
-            color: #b0b0b0;
+            opacity: 0.8;
             font-size: 0.9rem;
         }
 
-        .listing-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #00d4ff;
+        }
+
+        .marketplace-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
             gap: 1rem;
         }
 
-        .detail-group {
-            text-align: left;
-        }
-
-        .detail-label {
-            color: #888;
-            font-size: 0.8rem;
-            margin-bottom: 0.2rem;
-        }
-
-        .detail-value {
-            font-weight: 600;
-            color: #ffffff;
-        }
-
-        .buy-btn {
-            width: 100%;
-            background: linear-gradient(45deg, #00ff88, #00cc66);
-            border: none;
-            padding: 0.8rem;
-            border-radius: 8px;
+        .tab-button {
+            padding: 0.8rem 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
             color: white;
-            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 1rem;
+            transition: all 0.3s;
         }
 
-        .buy-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+        .tab-button.active {
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
         }
 
-        /* Sidebar */
-        .sidebar {
-            display: flex;
-            flex-direction: column;
+        .listings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 2rem;
         }
 
-        .sidebar-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+        .listing-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 15px;
             padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .listing-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.2);
+        }
+
+        .listing-ticker {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 1rem;
+        }
+
+        .listing-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .listing-amount {
+            color: #4ecdc4;
+            font-weight: 600;
+        }
+
+        .listing-price {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+
+        .listing-total {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        .buy-button {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+
+        .buy-button:hover {
+            transform: scale(1.02);
+        }
+
+        .create-listing-form {
+            background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #00d4ff;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .footer {
+            margin-top: 4rem;
+            padding: 2rem;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.5);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer a {
+            color: #00d4ff;
+            text-decoration: none;
         }
 
         .balance-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
             text-align: center;
         }
 
         .balance-title {
-            color: #b0b0b0;
+            color: #00d4ff;
+            font-size: 1.3rem;
             margin-bottom: 1rem;
         }
 
-        .balance-amount {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #00f5ff;
-            margin-bottom: 0.5rem;
+        .balance-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4ecdc4;
         }
 
-        .balance-usd {
-            color: #888;
-            font-size: 0.9rem;
-        }
-
-        /* Trading Form */
-        .trading-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .form-label {
-            color: #b0b0b0;
-            font-size: 0.9rem;
-        }
-
-        .form-input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            padding: 0.8rem;
-            color: white;
-            font-size: 1rem;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #00f5ff;
-        }
-
-        .submit-btn {
-            background: linear-gradient(45deg, #00f5ff, #0080ff);
-            border: none;
-            padding: 1rem;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 5px 15px rgba(0, 245, 255, 0.3);
-        }
-
-        /* Footer */
-        .footer {
-            background: rgba(0, 0, 0, 0.8);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 2rem 0;
-            text-align: center;
-            margin-top: 4rem;
-        }
-
-        .footer-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .footer-links a {
-            color: #b0b0b0;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .footer-links a:hover {
-            color: #00f5ff;
-        }
-
-        .created-by {
-            color: #888;
-        }
-
-        .created-by a {
-            color: #00f5ff;
-            text-decoration: none;
-        }
-
-        /* Loading States */
         .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #00f5ff;
-            animation: spin 1s ease-in-out infinite;
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.2rem;
+            opacity: 0.8;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .error {
+            color: #ff6b6b;
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 10px;
+            margin: 1rem 0;
         }
 
-        /* Mobile Responsive */
         @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
             .nav {
                 flex-direction: column;
                 gap: 1rem;
             }
-
+            
             .nav-links {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .footer-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .footer-links {
+                flex-wrap: wrap;
                 justify-content: center;
             }
-        }
-
-        /* Notifications */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(45deg, #00f5ff, #0080ff);
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 245, 255, 0.3);
-            z-index: 1000;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.error {
-            background: linear-gradient(45deg, #ff4757, #ff3838);
-        }
-
-        .notification.success {
-            background: linear-gradient(45deg, #2ed573, #1abc9c);
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
-        <nav class="container">
-            <div class="nav">
-                <div class="logo">MON-20 Marketplace</div>
-                <ul class="nav-links">
-                    <li><a href="#marketplace">Marketplace</a></li>
-                    <li><a href="#analytics">Analytics</a></li>
-                    <li><a href="#about">About</a></li>
-                </ul>
-                <button class="wallet-btn" onclick="connectWallet()">
-                    <span id="wallet-status">Connect Wallet</span>
-                </button>
-            </div>
+        <nav class="nav">
+            <div class="logo">MON-20 Marketplace</div>
+            <ul class="nav-links">
+                <li><a href="#marketplace">Marketplace</a></li>
+                <li><a href="#create">Create Listing</a></li>
+                <li><a href="#stats">Stats</a></li>
+            </ul>
+            <button class="connect-wallet" onclick="connectWallet()">Connect Wallet</button>
         </nav>
     </header>
 
-    <!-- Hero Section -->
     <section class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <h1>Trade MON-20 Inscriptions</h1>
-                <p>The first inscription marketplace on Monad Testnet. Trade $MONS tokens with zero fees and lightning speed.</p>
-                
-                <!-- Stats Grid -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="total-supply">21,000,000</div>
-                        <div class="stat-label">Total Supply</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="floor-price">0.0001</div>
-                        <div class="stat-label">Floor Price (MON)</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="volume-24h">2,548</div>
-                        <div class="stat-label">24h Volume (MON)</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="active-listings">156</div>
-                        <div class="stat-label">Active Listings</div>
-                    </div>
-                </div>
-            </div>
+        <h1>First Inscription Protocol on MONAD</h1>
+        <p>Trade MON-20 tokens on the most advanced inscription marketplace</p>
+        <p style="font-size: 0.9rem; opacity: 0.6;">$MONS • 21,000,000 Supply • 1000 MONS/mint • Chain ID: 10143</p>
+    </section>
+
+    <section class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" id="floorPrice">Loading...</div>
+            <div class="stat-label">Floor Price (MON)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="volume24h">Loading...</div>
+            <div class="stat-label">24h Volume (MON)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="totalListings">Loading...</div>
+            <div class="stat-label">Total Listings</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="totalMinted">Loading...</div>
+            <div class="stat-label">Total Minted MONS</div>
         </div>
     </section>
 
-    <!-- Main Content -->
-    <div class="container">
-        <div class="main-content">
-            <!-- Marketplace Section -->
-            <div class="marketplace-section" id="marketplace">
-                <div class="section-header">
-                    <h2 class="section-title">Active Listings</h2>
-                    <div class="filter-tabs">
-                        <button class="tab-btn active" onclick="filterListings('all', this)">All</button>
-                        <button class="tab-btn" onclick="filterListings('lowest', this)">Lowest Price</button>
-                        <button class="tab-btn" onclick="filterListings('highest', this)">Highest Price</button>
-                    </div>
-                </div>
-                
-                <div class="listings-container" id="listings-container">
-                    <!-- Listings will be populated here -->
-                </div>
-            </div>
-
-            <!-- Sidebar -->
-            <div class="sidebar">
-                <!-- Balance Card -->
-                <div class="sidebar-card balance-section">
-                    <h3 class="balance-title">Your $MONS Balance</h3>
-                    <div class="balance-amount" id="user-balance">0</div>
-                    <div class="balance-usd">≈ $0.00 USD</div>
-                </div>
-
-                <!-- Trading Form -->
-                <div class="sidebar-card">
-                    <h3 class="section-title" style="margin-bottom: 1rem;">Create Listing</h3>
-                    <form class="trading-form" id="create-listing-form">
-                        <div class="form-group">
-                            <label class="form-label">Amount (MONS)</label>
-                            <input type="number" class="form-input" placeholder="1000" id="sell-amount" min="1" step="1">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Price per Token (MON)</label>
-                            <input type="number" class="form-input" placeholder="0.0001" id="sell-price" min="0.0001" step="0.0001">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Total: <span id="total-price">0 MON</span></label>
-                        </div>
-                        <button type="submit" class="submit-btn">Create Listing</button>
-                    </form>
-                </div>
-
-                <!-- Contract Info -->
-                <div class="sidebar-card">
-                    <h3 class="section-title" style="margin-bottom: 1rem;">Contract Info</h3>
-                    <div style="font-size: 0.9rem; line-height: 1.6;">
-                        <div style="margin-bottom: 0.5rem;">
-                            <strong>Ticker:</strong> $MONS
-                        </div>
-                        <div style="margin-bottom: 0.5rem;">
-                            <strong>Supply:</strong> 21,000,000
-                        </div>
-                        <div style="margin-bottom: 0.5rem;">
-                            <strong>Mint Size:</strong> 1,000 MONS
-                        </div>
-                        <div style="margin-bottom: 0.5rem;">
-                            <strong>Network:</strong> Monad Testnet
-                        </div>
-                        <div style="font-size: 0.8rem; color: #888; margin-top: 1rem;">
-                            Contract: 0xB28AC2AfADCcc79cd74c487BEE0a841bBE89fDa6
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <main class="main-content">
+        <div class="balance-section" id="balanceSection" style="display: none;">
+            <div class="balance-title">Your MONS Balance</div>
+            <div class="balance-value" id="userBalance">0</div>
         </div>
-    </div>
 
-    <!-- Footer -->
+        <section id="marketplace">
+            <h2 class="section-title">Marketplace</h2>
+            
+            <div class="marketplace-tabs">
+                <button class="tab-button active" onclick="switchTab('listings')">Active Listings</button>
+                <button class="tab-button" onclick="switchTab('history')">Trade History</button>
+            </div>
+
+            <div id="listings-content">
+                <div class="listings-grid" id="listingsGrid">
+                    <div class="loading">Loading listings...</div>
+                </div>
+            </div>
+
+            <div id="history-content" style="display: none;">
+                <div class="loading">Loading trade history...</div>
+            </div>
+        </section>
+
+        <section id="create" class="create-listing-form">
+            <h2 class="section-title">Create Listing</h2>
+            
+            <div class="form-group">
+                <label for="listingTicker">Ticker</label>
+                <input type="text" id="listingTicker" value="MONS" readonly>
+            </div>
+            
+            <div class="form-group">
+                <label for="listingAmount">Amount</label>
+                <input type="number" id="listingAmount" placeholder="Enter amount to sell" min="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="listingPrice">Price per Token (MON)</label>
+                <input type="number" id="listingPrice" placeholder="Enter price per token" step="0.000001">
+            </div>
+            
+            <button class="buy-button" onclick="createListing()">Create Listing</button>
+        </section>
+    </main>
+
     <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-links">
-                    <a href="#marketplace">Marketplace</a>
-                    <a href="#analytics">Analytics</a>
-                    <a href="https://testnet-rpc.monad.xyz" target="_blank">RPC</a>
-                    <a href="#docs">Docs</a>
-                </div>
-                <div class="created-by">
-                    Created by <a href="https://x.com/ega_2ez4crypto" target="_blank">@ega_2ez4crypto</a>
-                </div>
-            </div>
-        </div>
+        <p>Created by <a href="https://x.com/ega_2ez4crypto" target="_blank">@ega_2ez4crypto</a></p>
+        <p>MON-20 Contract: <a href="#" target="_blank">0x07169f0F890C3595421512D98DC79b8bce6E5fA6</a></p>
+        <p>Marketplace Contract: <a href="#" target="_blank">0xB28AC2AfADCcc79cd74c487BEE0a841bBE89fDa6</a></p>
     </footer>
 
     <script>
         // Contract addresses and configuration
-        const MARKETPLACE_CONTRACT = '0xB28AC2AfADCcc79cd74c487BEE0a841bBE89fDa6';
-        const TOKEN_CONTRACT = '0x07169f0F890C3595421512D98DC79b8bce6E5fA6';
-        const CHAIN_ID = 10143;
-        const RPC_URL = 'https://testnet-rpc.monad.xyz';
+        const MONAD_TESTNET = {
+            chainId: 10143,
+            rpc: 'https://testnet-rpc.monad.xyz',
+            name: 'MONAD Testnet'
+        };
 
-        // Contract ABI (simplified for key functions)
+        const MARKETPLACE_ADDRESS = '0xB28AC2AfADCcc79cd74c487BEE0a841bBE89fDa6';
+        const TOKEN_ADDRESS = '0x07169f0F890C3595421512D98DC79b8bce6E5fA6';
+
+        // ABI for marketplace contract (from your provided ABI)
         const MARKETPLACE_ABI = [
+            {
+                "inputs": [
+                    {"internalType": "string[]", "name": "tickers", "type": "string[]"},
+                    {"internalType": "uint256[]", "name": "amounts", "type": "uint256[]"},
+                    {"internalType": "string[]", "name": "inscriptionDatas", "type": "string[]"}
+                ],
+                "name": "batchMintInscriptions",
+                "outputs": [],
+                "stateMutability": "payable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "uint256", "name": "listingId", "type": "uint256"}],
+                "name": "cancelListing",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
             {
                 "inputs": [
                     {"internalType": "string", "name": "ticker", "type": "string"},
@@ -710,27 +490,26 @@
                     {"internalType": "string", "name": "ticker", "type": "string"}
                 ],
                 "name": "balanceOf",
-                "outputs": [
-                    {"internalType": "uint256", "name": "", "type": "uint256"}
-                ],
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
                 "stateMutability": "view",
                 "type": "function"
             },
             {
-                "inputs": [
-                    {"internalType": "string", "name": "ticker", "type": "string"}
-                ],
+                "inputs": [],
+                "name": "getActiveListingsCount",
+                "outputs": [{"internalType": "uint256", "name": "count", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "string", "name": "ticker", "type": "string"}],
                 "name": "getActiveListingsForTicker",
-                "outputs": [
-                    {"internalType": "uint256[]", "name": "", "type": "uint256[]"}
-                ],
+                "outputs": [{"internalType": "uint256[]", "name": "", "type": "uint256[]"}],
                 "stateMutability": "view",
                 "type": "function"
             },
             {
-                "inputs": [
-                    {"internalType": "uint256", "name": "listingId", "type": "uint256"}
-                ],
+                "inputs": [{"internalType": "uint256", "name": "listingId", "type": "uint256"}],
                 "name": "getListing",
                 "outputs": [
                     {"internalType": "address", "name": "seller", "type": "address"},
@@ -746,484 +525,592 @@
         ];
 
         // Global variables
-        let web3Provider;
-        let contract;
-        let userAccount;
-        let listings = [];
+        let provider = null;
+        let signer = null;
+        let marketplaceContract = null;
+        let userAccount = null;
 
         // Initialize the application
-        async function initApp() {
-            showSampleListings();
-            updateStats();
-            startPriceAnimations();
-            setupFormHandlers();
-            
-            // Try to load real listings
+        async function init() {
             try {
-                await loadListings();
-            } catch (error) {
-                console.log('Using sample data for demo');
-            }
-            
-            // Update data every 30 seconds
-            setInterval(async () => {
-                try {
-                    await loadListings();
-                    updateStats();
-                } catch (error) {
-                    console.log('Failed to update listings');
+                if (typeof window.ethereum !== 'undefined') {
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    
+                    // Check if already connected
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        await connectWallet();
+                    }
                 }
-            }, 30000);
+                
+                await loadMarketplaceData();
+                setInterval(loadMarketplaceData, 30000); // Refresh every 30 seconds
+            } catch (error) {
+                console.error('Initialization error:', error);
+            }
         }
 
         // Connect wallet function
         async function connectWallet() {
             try {
-                if (typeof window.ethereum !== 'undefined') {
-                    web3Provider = new ethers.BrowserProvider(window.ethereum);
-                    
-                    // Request account access
-                    await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    
-                    // Check if we're on the correct network
-                    const network = await web3Provider.getNetwork();
-                    if (network.chainId !== BigInt(CHAIN_ID)) {
-                        try {
-                            await window.ethereum.request({
-                                method: 'wallet_switchEthereumChain',
-                                params: [{ chainId: `0x${CHAIN_ID.toString(16)}` }],
-                            });
-                        } catch (switchError) {
-                            // Network doesn't exist, add it
+                if (!provider) {
+                    alert('Please install MetaMask or another Web3 wallet');
+                    return;
+                }
+
+                // Request account access
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                
+                // Get the signer
+                signer = await provider.getSigner();
+                userAccount = await signer.getAddress();
+                
+                // Check if we're on the correct network
+                const network = await provider.getNetwork();
+                if (Number(network.chainId) !== MONAD_TESTNET.chainId) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: `0x${MONAD_TESTNET.chainId.toString(16)}` }],
+                        });
+                    } catch (switchError) {
+                        // Network doesn't exist, add it
+                        if (switchError.code === 4902) {
                             await window.ethereum.request({
                                 method: 'wallet_addEthereumChain',
                                 params: [{
-                                    chainId: `0x${CHAIN_ID.toString(16)}`,
-                                    chainName: 'Monad Testnet',
+                                    chainId: `0x${MONAD_TESTNET.chainId.toString(16)}`,
+                                    chainName: MONAD_TESTNET.name,
+                                    rpcUrls: [MONAD_TESTNET.rpc],
                                     nativeCurrency: {
                                         name: 'MON',
                                         symbol: 'MON',
                                         decimals: 18
-                                    },
-                                    rpcUrls: [RPC_URL],
-                                    blockExplorerUrls: ['https://testnet-explorer.monad.xyz']
-                                }],
+                                    }
+                                }]
                             });
                         }
                     }
-
-                    const signer = await web3Provider.getSigner();
-                    userAccount = await signer.getAddress();
-                    contract = new ethers.Contract(MARKETPLACE_CONTRACT, MARKETPLACE_ABI, signer);
-
-                    // Update UI
-                    document.getElementById('wallet-status').textContent = 
-                        `${userAccount.slice(0, 6)}...${userAccount.slice(-4)}`;
-                    
-                    // Load user balance
-                    await loadUserBalance();
-                    
-                    showNotification('Wallet connected successfully!', 'success');
-                } else {
-                    showNotification('Please install MetaMask!', 'error');
                 }
+                
+                // Create contract instance
+                marketplaceContract = new ethers.Contract(MARKETPLACE_ADDRESS, MARKETPLACE_ABI, signer);
+                
+                // Update UI
+                document.querySelector('.connect-wallet').textContent = 
+                    `${userAccount.slice(0, 6)}...${userAccount.slice(-4)}`;
+                
+                // Load user balance
+                await loadUserBalance();
+                
+                console.log('Wallet connected:', userAccount);
             } catch (error) {
                 console.error('Error connecting wallet:', error);
-                showNotification('Failed to connect wallet', 'error');
+                alert('Error connecting wallet: ' + error.message);
             }
         }
 
         // Load user balance
         async function loadUserBalance() {
-            if (!contract || !userAccount) return;
+            if (!marketplaceContract || !userAccount) return;
             
             try {
-                const balance = await contract.balanceOf(userAccount, "MONS");
-                const formattedBalance = ethers.formatUnits(balance, 18);
-                document.getElementById('user-balance').textContent = 
+                const balance = await marketplaceContract.balanceOf(userAccount, "MONS");
+                const formattedBalance = ethers.formatEther(balance);
+                
+                document.getElementById('userBalance').textContent = 
                     Number(formattedBalance).toLocaleString();
+                document.getElementById('balanceSection').style.display = 'block';
             } catch (error) {
                 console.error('Error loading balance:', error);
-                document.getElementById('user-balance').textContent = '0';
             }
         }
 
-        // Load listings from contract
-        async function loadListings() {
+        // Load marketplace data
+        async function loadMarketplaceData() {
             try {
-                const provider = new ethers.JsonRpcProvider(RPC_URL);
-                const readContract = new ethers.Contract(MARKETPLACE_CONTRACT, MARKETPLACE_ABI, provider);
+                // Create read-only provider for loading data
+                const readProvider = new ethers.JsonRpcProvider(MONAD_TESTNET.rpc);
+                const readContract = new ethers.Contract(MARKETPLACE_ADDRESS, MARKETPLACE_ABI, readProvider);
                 
-                // Get active listings for MONS
-                const listingIds = await readContract.getActiveListingsForTicker("MONS");
+                await Promise.all([
+                    loadStats(readContract),
+                    loadListings(readContract)
+                ]);
+            } catch (error) {
+                console.error('Error loading marketplace data:', error);
+            }
+        }
+
+        // Load statistics
+        async function loadStats(contract) {
+            try {
+                const activeListingsCount = await contract.getActiveListingsCount();
+                const activeListings = await contract.getActiveListingsForTicker("MONS");
                 
-                listings = [];
-                for (const id of listingIds) {
-                    try {
-                        const listing = await readContract.getListing(id);
-                        if (listing[4]) { // active
-                            listings.push({
-                                id: id,
-                                seller: listing[0],
-                                ticker: listing[1],
-                                amount: listing[2],
-                                pricePerToken: listing[3],
-                                active: listing[4],
-                                createdAt: listing[5]
-                            });
+                let floorPrice = "0.000000";
+                let totalVolume = "0";
+                
+                // Calculate floor price by checking all active listings
+                if (activeListings.length > 0) {
+                    let minPrice = ethers.MaxUint256;
+                    
+                    for (let i = 0; i < activeListings.length; i++) {
+                        try {
+                            const listing = await contract.getListing(activeListings[i]);
+                            if (listing.active && listing.pricePerToken < minPrice) {
+                                minPrice = listing.pricePerToken;
+                            }
+                        } catch (e) {
+                            // Skip invalid listings
                         }
-                    } catch (error) {
-                        console.error(`Error loading listing ${id}:`, error);
+                    }
+                    
+                    if (minPrice !== ethers.MaxUint256) {
+                        floorPrice = ethers.formatEther(minPrice);
                     }
                 }
                 
-                if (listings.length > 0) {
-                    displayListings();
+                // Update UI
+                document.getElementById('floorPrice').textContent = 
+                    Number(floorPrice).toFixed(6);
+                document.getElementById('volume24h').textContent = totalVolume;
+                document.getElementById('totalListings').textContent = 
+                    Number(activeListingsCount).toLocaleString();
+                document.getElementById('totalMinted').textContent = 
+                    "Loading..."; // This would require the token contract
+                    
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Load active listings
+        async function loadListings(contract) {
+            try {
+                const activeListings = await contract.getActiveListingsForTicker("MONS");
+                const listingsGrid = document.getElementById('listingsGrid');
+                
+                if (activeListings.length === 0) {
+                    listingsGrid.innerHTML = '<div class="loading">No active listings found</div>';
+                    return;
                 }
+                
+                let listingsHTML = '';
+                
+                for (let i = 0; i < activeListings.length; i++) {
+                    try {
+                        const listing = await contract.getListing(activeListings[i]);
+                        
+                        if (listing.active) {
+                            const amount = ethers.formatEther(listing.amount);
+                            const pricePerToken = ethers.formatEther(listing.pricePerToken);
+                            const totalPrice = (Number(amount) * Number(pricePerToken)).toFixed(6);
+                            
+                            listingsHTML += `
+                                <div class="listing-card">
+                                    <div class="listing-ticker">MONS</div>
+                                    <div class="listing-details">
+                                        <span class="listing-amount">${Number(amount).toLocaleString()} MONS</span>
+                                        <span class="listing-price">${Number(pricePerToken).toFixed(6)} MON</span>
+                                    </div>
+                                    <div class="listing-total">Total: ${totalPrice} MON</div>
+                                    <button class="buy-button" onclick="buyInscription(${activeListings[i]}, '${amount}', '${totalPrice}')">
+                                        Buy Now
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    } catch (e) {
+                        // Skip invalid listings
+                    }
+                }
+                
+                listingsGrid.innerHTML = listingsHTML || '<div class="loading">No valid listings found</div>';
+                
             } catch (error) {
                 console.error('Error loading listings:', error);
-                throw error;
+                document.getElementById('listingsGrid').innerHTML = 
+                    '<div class="error">Error loading listings</div>';
             }
         }
 
-        // Display listings in the UI
-        function displayListings() {
-            const container = document.getElementById('listings-container');
+        // Create a new listing
+        async function createListing() {
+            if (!marketplaceContract || !signer) {
+                alert('Please connect your wallet first');
+                return;
+            }
             
-            if (listings.length === 0) {
-                showSampleListings();
+            const ticker = document.getElementById('listingTicker').value;
+            const amount = document.getElementById('listingAmount').value;
+            const pricePerToken = document.getElementById('listingPrice').value;
+            
+            if (!amount || !pricePerToken || amount <= 0 || pricePerToken <= 0) {
+                alert('Please enter valid amount and price');
                 return;
             }
-
-            container.innerHTML = listings.map(listing => `
-                <div class="listing-item">
-                    <div class="listing-header">
-                        <div class="listing-ticker">${listing.ticker}</div>
-                        <div class="listing-amount">${ethers.formatUnits(listing.amount, 18)} tokens</div>
-                    </div>
-                    <div class="listing-details">
-                        <div class="detail-group">
-                            <div class="detail-label">Price per Token</div>
-                            <div class="detail-value">${ethers.formatEther(listing.pricePerToken)} MON</div>
-                        </div>
-                        <div class="detail-group">
-                            <div class="detail-label">Total Price</div>
-                            <div class="detail-value">${ethers.formatEther(listing.pricePerToken * listing.amount / BigInt(10**18))} MON</div>
-                        </div>
-                    </div>
-                    <div class="listing-details">
-                        <div class="detail-group">
-                            <div class="detail-label">Seller</div>
-                            <div class="detail-value">${listing.seller.slice(0, 6)}...${listing.seller.slice(-4)}</div>
-                        </div>
-                        <div class="detail-group">
-                            <div class="detail-label">Listed</div>
-                            <div class="detail-value">${new Date(Number(listing.createdAt) * 1000).toLocaleDateString()}</div>
-                        </div>
-                    </div>
-                    <button class="buy-btn" onclick="buyTokens(${listing.id})">
-                        Buy Now
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        // Show sample listings for demo purposes
-        function showSampleListings() {
-            const container = document.getElementById('listings-container');
-            const sampleListings = [
-                { id: 1, amount: '1,000', price: '0.0001', total: '0.1000', seller: '0x1234...5678', date: 'Today' },
-                { id: 2, amount: '5,000', price: '0.00009', total: '0.4500', seller: '0xabcd...efgh', date: 'Yesterday' },
-                { id: 3, amount: '2,500', price: '0.00012', total: '0.3000', seller: '0x9876...4321', date: '2 days ago' },
-                { id: 4, amount: '10,000', price: '0.00008', total: '0.8000', seller: '0xdef0...1234', date: '3 days ago' },
-                { id: 5, amount: '3,000', price: '0.00011', total: '0.3300', seller: '0x5678...9abc', date: '1 week ago' },
-            ];
-
-            container.innerHTML = sampleListings.map(listing => `
-                <div class="listing-item">
-                    <div class="listing-header">
-                        <div class="listing-ticker">$MONS</div>
-                        <div class="listing-amount">${listing.amount} tokens</div>
-                    </div>
-                    <div class="listing-details">
-                        <div class="detail-group">
-                            <div class="detail-label">Price per Token</div>
-                            <div class="detail-value">${listing.price} MON</div>
-                        </div>
-                        <div class="detail-group">
-                            <div class="detail-label">Total Price</div>
-                            <div class="detail-value">${listing.total} MON</div>
-                        </div>
-                    </div>
-                    <div class="listing-details">
-                        <div class="detail-group">
-                            <div class="detail-label">Seller</div>
-                            <div class="detail-value">${listing.seller}</div>
-                        </div>
-                        <div class="detail-group">
-                            <div class="detail-label">Listed</div>
-                            <div class="detail-value">${listing.date}</div>
-                        </div>
-                    </div>
-                    <button class="buy-btn" onclick="connectWalletPrompt()">
-                        ${userAccount ? 'Buy Now' : 'Connect Wallet to Buy'}
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        // Buy tokens function
-        async function buyTokens(listingId) {
-            if (!contract || !userAccount) {
-                showNotification('Please connect your wallet first!', 'error');
-                return;
-            }
-
+            
             try {
-                const listing = listings.find(l => l.id === listingId);
-                if (!listing) {
-                    showNotification('Listing not found!', 'error');
-                    return;
-                }
-
-                const totalPrice = listing.pricePerToken * listing.amount / BigInt(10**18);
+                const amountWei = ethers.parseEther(amount);
+                const priceWei = ethers.parseEther(pricePerToken);
                 
-                showNotification('Initiating purchase...', 'info');
+                const tx = await marketplaceContract.createListing(ticker, amountWei, priceWei);
                 
-                const tx = await contract.purchaseInscriptions(
-                    listingId,
-                    listing.amount,
-                    { value: totalPrice }
-                );
-
-                showNotification('Transaction submitted! Waiting for confirmation...', 'success');
+                alert('Transaction sent! Waiting for confirmation...');
+                console.log('Transaction hash:', tx.hash);
+                
                 await tx.wait();
                 
-                showNotification('Purchase successful!', 'success');
-                await loadListings();
-                await loadUserBalance();
-            } catch (error) {
-                console.error('Error buying tokens:', error);
-                showNotification('Transaction failed! Please try again.', 'error');
-            }
-        }
-
-        // Create listing function
-        async function createListing(amount, pricePerToken) {
-            if (!contract || !userAccount) {
-                showNotification('Please connect your wallet first!', 'error');
-                return;
-            }
-
-            try {
-                const amountWei = ethers.parseUnits(amount.toString(), 18);
-                const priceWei = ethers.parseEther(pricePerToken.toString());
-
-                showNotification('Creating listing...', 'info');
-
-                const tx = await contract.createListing("MONS", amountWei, priceWei);
+                alert('Listing created successfully!');
                 
-                showNotification('Transaction submitted! Waiting for confirmation...', 'success');
-                await tx.wait();
+                // Clear form
+                document.getElementById('listingAmount').value = '';
+                document.getElementById('listingPrice').value = '';
                 
-                showNotification('Listing created successfully!', 'success');
-                await loadListings();
-                await loadUserBalance();
+                // Reload data
+                await loadMarketplaceData();
+                
             } catch (error) {
                 console.error('Error creating listing:', error);
-                showNotification('Failed to create listing! Make sure you have enough balance.', 'error');
+                alert('Error creating listing: ' + error.message);
             }
         }
 
-        // Setup form handlers
-        function setupFormHandlers() {
-            // Price calculation for create listing form
-            const amountInput = document.getElementById('sell-amount');
-            const priceInput = document.getElementById('sell-price');
-            const totalElement = document.getElementById('total-price');
-
-            function updateTotal() {
-                const amount = parseFloat(amountInput.value) || 0;
-                const price = parseFloat(priceInput.value) || 0;
-                const total = amount * price;
-                totalElement.textContent = `${total.toFixed(6)} MON`;
-            }
-
-            amountInput.addEventListener('input', updateTotal);
-            priceInput.addEventListener('input', updateTotal);
-
-            // Form submission
-            document.getElementById('create-listing-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const amount = parseFloat(amountInput.value);
-                const price = parseFloat(priceInput.value);
-
-                if (!amount || !price) {
-                    showNotification('Please enter valid amount and price!', 'error');
-                    return;
-                }
-
-                if (amount < 1) {
-                    showNotification('Minimum amount is 1 MONS!', 'error');
-                    return;
-                }
-
-                if (price <= 0) {
-                    showNotification('Price must be greater than 0!', 'error');
-                    return;
-                }
-
-                await createListing(amount, price);
-                
-                // Reset form on success
-                amountInput.value = '';
-                priceInput.value = '';
-                updateTotal();
-            });
-        }
-
-        // Filter listings
-        function filterListings(filter, button) {
-            // Update active tab
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-
-            if (listings.length === 0) {
-                // Filter sample listings
-                showSampleListings();
+        // Buy inscription
+        async function buyInscription(listingId, amount, totalPrice) {
+            if (!marketplaceContract || !signer) {
+                alert('Please connect your wallet first');
                 return;
             }
-
-            let filteredListings = [...listings];
-
-            switch (filter) {
-                case 'lowest':
-                    filteredListings.sort((a, b) => Number(a.pricePerToken - b.pricePerToken));
-                    break;
-                case 'highest':
-                    filteredListings.sort((a, b) => Number(b.pricePerToken - a.pricePerToken));
-                    break;
-            }
-
-            const originalListings = listings;
-            listings = filteredListings;
-            displayListings();
-            listings = originalListings;
-        }
-
-        // Update statistics
-        function updateStats() {
-            // Calculate floor price from sample data or real data
-            let floorPrice = 0.0001;
-            if (listings.length > 0) {
-                floorPrice = Math.min(...listings.map(l => parseFloat(ethers.formatEther(l.pricePerToken))));
+            
+            if (!confirm(`Buy ${amount} MONS for ${totalPrice} MON?`)) {
+                return;
             }
             
-            document.getElementById('floor-price').textContent = floorPrice.toFixed(6);
-            
-            // Update active listings count
-            const activeCount = listings.length > 0 ? listings.length : Math.floor(Math.random() * 50) + 100;
-            document.getElementById('active-listings').textContent = activeCount;
-
-            // Simulate 24h volume
-            const simulatedVolume = Math.floor(Math.random() * 3000) + 1500;
-            document.getElementById('volume-24h').textContent = simulatedVolume.toLocaleString();
-        }
-
-        // Animate price changes
-        function startPriceAnimations() {
-            setInterval(() => {
-                const priceElements = [
-                    document.getElementById('floor-price'),
-                    document.getElementById('volume-24h')
-                ];
-
-                priceElements.forEach(element => {
-                    if (Math.random() > 0.8) { // 20% chance to animate
-                        element.style.color = '#00ff88';
-                        element.style.transform = 'scale(1.05)';
-                        setTimeout(() => {
-                            element.style.color = '#00f5ff';
-                            element.style.transform = 'scale(1)';
-                        }, 1000);
-                    }
-                });
-            }, 8000);
-        }
-
-        // Show notification
-        function showNotification(message, type = 'info') {
-            // Remove existing notifications
-            const existingNotifications = document.querySelectorAll('.notification');
-            existingNotifications.forEach(notification => {
-                notification.remove();
-            });
-
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-
-            setTimeout(() => notification.classList.add('show'), 100);
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => {
-                    if (document.body.contains(notification)) {
-                        document.body.removeChild(notification);
-                    }
-                }, 300);
-            }, 4000);
-        }
-
-        // Connect wallet prompt
-        function connectWalletPrompt() {
-            if (!userAccount) {
-                showNotification('Please connect your wallet to trade!', 'error');
-            }
-        }
-
-        // Add some interactive effects
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add hover effects to stat cards
-            const statCards = document.querySelectorAll('.stat-card');
-            statCards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-10px) scale(1.02)';
-                });
+            try {
+                const totalPriceWei = ethers.parseEther(totalPrice);
+                const amountWei = ethers.parseEther(amount);
                 
-                card.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0) scale(1)';
-                });
+                const tx = await marketplaceContract.purchaseInscriptions(
+                    listingId, 
+                    amountWei,
+                    { value: totalPriceWei }
+                );
+                
+                alert('Transaction sent! Waiting for confirmation...');
+                console.log('Transaction hash:', tx.hash);
+                
+                await tx.wait();
+                
+                alert('Purchase successful!');
+                
+                // Reload data
+                await Promise.all([
+                    loadMarketplaceData(),
+                    loadUserBalance()
+                ]);
+                
+            } catch (error) {
+                console.error('Error buying inscription:', error);
+                alert('Error buying inscription: ' + error.message);
+            }
+        }
+
+        // Switch tabs
+        function switchTab(tab) {
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            if (tab === 'listings') {
+                document.getElementById('listings-content').style.display = 'block';
+                document.getElementById('history-content').style.display = 'none';
+                buttons[0].classList.add('active');
+            } else {
+                document.getElementById('listings-content').style.display = 'none';
+                document.getElementById('history-content').style.display = 'block';
+                buttons[1].classList.add('active');
+            }
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', init);
+
+        // Handle account changes
+        if (typeof window.ethereum !== 'undefined') {
+            window.ethereum.on('accountsChanged', async (accounts) => {
+                if (accounts.length === 0) {
+                    // User disconnected
+                    userAccount = null;
+                    signer = null;
+                    marketplaceContract = null;
+                    document.querySelector('.connect-wallet').textContent = 'Connect Wallet';
+                    document.getElementById('balanceSection').style.display = 'none';
+                } else {
+                    // User switched accounts
+                    await connectWallet();
+                }
             });
 
-            // Add scroll reveal effect
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
+            window.ethereum.on('chainChanged', (chainId) => {
+                // Reload the page when chain changes
+                window.location.reload();
+            });
+        }
 
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }
-                });
-            }, observerOptions);
-
-            // Observe elements for scroll reveal
-            document.querySelectorAll('.stat-card, .marketplace-section, .sidebar-card').forEach(el => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(20px)';
-                el.style.transition = 'all 0.6s ease';
-                observer.observe(el);
+        // Add smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
             });
         });
 
-        // Initialize app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', initApp);
+        // Add loading animation
+        function showLoading(elementId, message = 'Loading...') {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = `<div class="loading">${message}</div>`;
+            }
+        }
+
+        // Format numbers with proper decimals
+        function formatNumber(num, decimals = 2) {
+            return Number(num).toLocaleString(undefined, {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
+        }
+
+        // Format address for display
+        function formatAddress(address) {
+            if (!address) return '';
+            return `${address.slice(0, 6)}...${address.slice(-4)}`;
+        }
+
+        // Add error handling for transactions
+        function handleTransactionError(error) {
+            console.error('Transaction error:', error);
+            
+            if (error.code === 4001) {
+                alert('Transaction cancelled by user');
+            } else if (error.code === -32603) {
+                alert('Transaction failed: Insufficient funds or contract error');
+            } else if (error.message.includes('insufficient funds')) {
+                alert('Insufficient MON balance for transaction');
+            } else if (error.message.includes('execution reverted')) {
+                alert('Transaction failed: Contract execution error');
+            } else {
+                alert('Transaction failed: ' + error.message);
+            }
+        }
+
+        // Enhanced buy function with better error handling
+        async function buyInscription(listingId, amount, totalPrice) {
+            if (!marketplaceContract || !signer) {
+                alert('Please connect your wallet first');
+                return;
+            }
+            
+            if (!confirm(`Buy ${formatNumber(amount, 0)} MONS for ${formatNumber(totalPrice, 6)} MON?`)) {
+                return;
+            }
+            
+            try {
+                // Check user's MON balance first
+                const balance = await provider.getBalance(userAccount);
+                const totalPriceWei = ethers.parseEther(totalPrice);
+                
+                if (balance < totalPriceWei) {
+                    alert('Insufficient MON balance for this purchase');
+                    return;
+                }
+                
+                const amountWei = ethers.parseEther(amount);
+                
+                // Estimate gas
+                const gasEstimate = await marketplaceContract.purchaseInscriptions.estimateGas(
+                    listingId, 
+                    amountWei,
+                    { value: totalPriceWei }
+                );
+                
+                const tx = await marketplaceContract.purchaseInscriptions(
+                    listingId, 
+                    amountWei,
+                    { 
+                        value: totalPriceWei,
+                        gasLimit: gasEstimate
+                    }
+                );
+                
+                alert('Transaction sent! Waiting for confirmation...');
+                console.log('Transaction hash:', tx.hash);
+                
+                const receipt = await tx.wait();
+                console.log('Transaction confirmed:', receipt);
+                
+                alert('Purchase successful!');
+                
+                // Reload data
+                await Promise.all([
+                    loadMarketplaceData(),
+                    loadUserBalance()
+                ]);
+                
+            } catch (error) {
+                handleTransactionError(error);
+            }
+        }
+
+        // Enhanced create listing function
+        async function createListing() {
+            if (!marketplaceContract || !signer) {
+                alert('Please connect your wallet first');
+                return;
+            }
+            
+            const ticker = document.getElementById('listingTicker').value;
+            const amount = document.getElementById('listingAmount').value;
+            const pricePerToken = document.getElementById('listingPrice').value;
+            
+            if (!amount || !pricePerToken || amount <= 0 || pricePerToken <= 0) {
+                alert('Please enter valid amount and price');
+                return;
+            }
+            
+            try {
+                // Check if user has enough MONS balance
+                const userBalance = await marketplaceContract.balanceOf(userAccount, "MONS");
+                const amountWei = ethers.parseEther(amount);
+                
+                if (userBalance < amountWei) {
+                    alert('Insufficient MONS balance for this listing');
+                    return;
+                }
+                
+                const priceWei = ethers.parseEther(pricePerToken);
+                
+                // Estimate gas
+                const gasEstimate = await marketplaceContract.createListing.estimateGas(
+                    ticker, 
+                    amountWei, 
+                    priceWei
+                );
+                
+                const tx = await marketplaceContract.createListing(
+                    ticker, 
+                    amountWei, 
+                    priceWei,
+                    { gasLimit: gasEstimate }
+                );
+                
+                alert('Transaction sent! Waiting for confirmation...');
+                console.log('Transaction hash:', tx.hash);
+                
+                const receipt = await tx.wait();
+                console.log('Transaction confirmed:', receipt);
+                
+                alert('Listing created successfully!');
+                
+                // Clear form
+                document.getElementById('listingAmount').value = '';
+                document.getElementById('listingPrice').value = '';
+                
+                // Reload data
+                await Promise.all([
+                    loadMarketplaceData(),
+                    loadUserBalance()
+                ]);
+                
+            } catch (error) {
+                handleTransactionError(error);
+            }
+        }
+
+        // Add real-time updates using events
+        function setupEventListeners() {
+            if (!marketplaceContract) return;
+            
+            try {
+                // Listen for new listings
+                marketplaceContract.on("ListingCreated", (listingId, seller, ticker, amount, pricePerToken) => {
+                    console.log('New listing created:', { listingId, seller, ticker, amount, pricePerToken });
+                    setTimeout(loadMarketplaceData, 2000); // Reload after 2 seconds
+                });
+                
+                // Listen for purchases
+                marketplaceContract.on("InscriptionsPurchased", (listingId, buyer, seller, ticker, amount, totalPrice, fee) => {
+                    console.log('Inscription purchased:', { listingId, buyer, seller, ticker, amount, totalPrice, fee });
+                    setTimeout(loadMarketplaceData, 2000);
+                    
+                    if (buyer.toLowerCase() === userAccount?.toLowerCase()) {
+                        setTimeout(loadUserBalance, 3000); // Update user balance
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error setting up event listeners:', error);
+            }
+        }
+
+        // Enhanced wallet connection with event listeners
+        async function connectWallet() {
+            try {
+                if (!provider) {
+                    alert('Please install MetaMask or another Web3 wallet');
+                    return;
+                }
+
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                signer = await provider.getSigner();
+                userAccount = await signer.getAddress();
+                
+                const network = await provider.getNetwork();
+                if (Number(network.chainId) !== MONAD_TESTNET.chainId) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: `0x${MONAD_TESTNET.chainId.toString(16)}` }],
+                        });
+                    } catch (switchError) {
+                        if (switchError.code === 4902) {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: `0x${MONAD_TESTNET.chainId.toString(16)}`,
+                                    chainName: MONAD_TESTNET.name,
+                                    rpcUrls: [MONAD_TESTNET.rpc],
+                                    nativeCurrency: {
+                                        name: 'MON',
+                                        symbol: 'MON',
+                                        decimals: 18
+                                    }
+                                }]
+                            });
+                        }
+                    }
+                }
+                
+                marketplaceContract = new ethers.Contract(MARKETPLACE_ADDRESS, MARKETPLACE_ABI, signer);
+                
+                document.querySelector('.connect-wallet').textContent = formatAddress(userAccount);
+                
+                await loadUserBalance();
+                setupEventListeners();
+                
+                console.log('Wallet connected:', userAccount);
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                alert('Error connecting wallet: ' + error.message);
+            }
+        }
     </script>
 </body>
 </html>
