@@ -443,6 +443,50 @@
         const MARKETPLACE_ADDRESS = '0xB28AC2AfADCcc79cd74c487BEE0a841bBE89fDa6';
         const TOKEN_ADDRESS = '0x07169f0F890C3595421512D98DC79b8bce6E5fA6';
 
+        // MON-20 Inscription Contract ABI (simplified for balance checking)
+        const MON20_ABI = [
+            {
+                "inputs": [
+                    {"internalType": "address", "name": "user", "type": "address"},
+                    {"internalType": "string", "name": "tick", "type": "string"}
+                ],
+                "name": "getBalance",
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {"internalType": "address", "name": "", "type": "address"},
+                    {"internalType": "string", "name": "", "type": "string"}
+                ],
+                "name": "balances",
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "string", "name": "tick", "type": "string"}],
+                "name": "getTotalMinted",
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "string", "name": "tick", "type": "string"}],
+                "name": "getTokenInfo",
+                "outputs": [
+                    {"internalType": "uint256", "name": "maxSupply", "type": "uint256"},
+                    {"internalType": "uint256", "name": "limitPerMint", "type": "uint256"},
+                    {"internalType": "uint256", "name": "minted", "type": "uint256"},
+                    {"internalType": "address", "name": "deployer", "type": "address"},
+                    {"internalType": "uint256", "name": "holdersCount", "type": "uint256"}
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
         // ABI for marketplace contract (from your provided ABI)
         const MARKETPLACE_ABI = [
             {
@@ -528,6 +572,7 @@
         let provider = null;
         let signer = null;
         let marketplaceContract = null;
+        let tokenContract = null;
         let userAccount = null;
 
         // Initialize the application
@@ -593,8 +638,9 @@
                     }
                 }
                 
-                // Create contract instance
+                // Create contract instances
                 marketplaceContract = new ethers.Contract(MARKETPLACE_ADDRESS, MARKETPLACE_ABI, signer);
+                tokenContract = new ethers.Contract(TOKEN_ADDRESS, MON20_ABI, signer);
                 
                 // Update UI
                 document.querySelector('.connect-wallet').textContent = 
@@ -612,17 +658,49 @@
 
         // Load user balance
         async function loadUserBalance() {
-            if (!marketplaceContract || !userAccount) return;
+            if (!userAccount) return;
             
             try {
-                const balance = await marketplaceContract.balanceOf(userAccount, "MONS");
+                // Create read-only provider for token contract
+                const readProvider = new ethers.JsonRpcProvider(MONAD_TESTNET.rpc);
+                const readTokenContract = new ethers.Contract(TOKEN_ADDRESS, MON20_ABI, readProvider);
+                
+                // Try multiple methods to get balance
+                let balance = 0;
+                
+                try {
+                    // Method 1: Try getBalance function
+                    balance = await readTokenContract.getBalance(userAccount, "MONS");
+                } catch (e1) {
+                    try {
+                        // Method 2: Try balances mapping directly
+                        balance = await readTokenContract.balances(userAccount, "MONS");
+                    } catch (e2) {
+                        try {
+                            // Method 3: Try marketplace contract balanceOf
+                            if (marketplaceContract) {
+                                balance = await marketplaceContract.balanceOf(userAccount, "MONS");
+                            }
+                        } catch (e3) {
+                            console.error('All balance methods failed:', { e1: e1.message, e2: e2.message, e3: e3.message });
+                            // Set balance to 0 if all methods fail
+                            balance = 0;
+                        }
+                    }
+                }
+                
                 const formattedBalance = ethers.formatEther(balance);
                 
                 document.getElementById('userBalance').textContent = 
                     Number(formattedBalance).toLocaleString();
                 document.getElementById('balanceSection').style.display = 'block';
+                
+                console.log('User MONS balance:', formattedBalance);
+                
             } catch (error) {
                 console.error('Error loading balance:', error);
+                document.getElementById('userBalance').textContent = '0';
+                document.getElementById('balanceSection').style.display = 'block';
             }
         }
 
@@ -645,11 +723,30 @@
         // Load statistics
         async function loadStats(contract) {
             try {
+                const readProvider = new ethers.JsonRpcProvider(MONAD_TESTNET.rpc);
+                const readTokenContract = new ethers.Contract(TOKEN_ADDRESS, MON20_ABI, readProvider);
+                
                 const activeListingsCount = await contract.getActiveListingsCount();
                 const activeListings = await contract.getActiveListingsForTicker("MONS");
                 
                 let floorPrice = "0.000000";
                 let totalVolume = "0";
+                let totalMinted = "0";
+                
+                // Get total minted from token contract
+                try {
+                    const mintedAmount = await readTokenContract.getTotalMinted("MONS");
+                    totalMinted = ethers.formatEther(mintedAmount);
+                } catch (e) {
+                    // Try getTokenInfo method
+                    try {
+                        const tokenInfo = await readTokenContract.getTokenInfo("MONS");
+                        totalMinted = ethers.formatEther(tokenInfo.minted);
+                    } catch (e2) {
+                        console.error('Could not get total minted:', e2.message);
+                        totalMinted = "Loading...";
+                    }
+                }
                 
                 // Calculate floor price by checking all active listings
                 if (activeListings.length > 0) {
@@ -678,7 +775,7 @@
                 document.getElementById('totalListings').textContent = 
                     Number(activeListingsCount).toLocaleString();
                 document.getElementById('totalMinted').textContent = 
-                    "Loading..."; // This would require the token contract
+                    totalMinted === "Loading..." ? totalMinted : Number(totalMinted).toLocaleString();
                     
             } catch (error) {
                 console.error('Error loading stats:', error);
@@ -987,11 +1084,30 @@
             
             try {
                 // Check if user has enough MONS balance
-                const userBalance = await marketplaceContract.balanceOf(userAccount, "MONS");
+                let userBalance = 0;
                 const amountWei = ethers.parseEther(amount);
                 
-                if (userBalance < amountWei) {
-                    alert('Insufficient MONS balance for this listing');
+                try {
+                    // Try multiple methods to check balance
+                    const readProvider = new ethers.JsonRpcProvider(MONAD_TESTNET.rpc);
+                    const readTokenContract = new ethers.Contract(TOKEN_ADDRESS, MON20_ABI, readProvider);
+                    
+                    try {
+                        userBalance = await readTokenContract.getBalance(userAccount, "MONS");
+                    } catch (e1) {
+                        try {
+                            userBalance = await readTokenContract.balances(userAccount, "MONS");
+                        } catch (e2) {
+                            userBalance = await marketplaceContract.balanceOf(userAccount, "MONS");
+                        }
+                    }
+                } catch (e) {
+                    console.error('Could not check balance:', e);
+                    // Continue anyway, let the contract handle the validation
+                }
+                
+                if (userBalance > 0 && userBalance < amountWei) {
+                    alert(`Insufficient MONS balance. You have ${ethers.formatEther(userBalance)} MONS`);
                     return;
                 }
                 
