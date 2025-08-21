@@ -1,1263 +1,514 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MON-20 Marketplace - First Inscription Protocol on MONAD</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
-            color: #ffffff;
-            min-height: 100vh;
-        }
-
-        .header {
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 2rem;
-        }
-
-        .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
-            background: linear-gradient(45deg, #00d4ff, #ff6b6b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: #ffffff;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: #00d4ff;
-        }
-
-        .connect-wallet {
-            padding: 0.7rem 1.5rem;
-            background: linear-gradient(45deg, #00d4ff, #0099cc);
-            border: none;
-            border-radius: 25px;
-            color: white;
-            cursor: pointer;
-            font-weight: 600;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .connect-wallet:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
-        }
-
-        .hero {
-            text-align: center;
-            padding: 4rem 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(45deg, #00d4ff, #ff6b6b, #4ecdc4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            opacity: 0.8;
-            margin-bottom: 2rem;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 2rem;
-            text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.2);
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #00d4ff;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            opacity: 0.8;
-            font-size: 0.9rem;
-        }
-
-        .main-content {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        .section-title {
-            font-size: 2rem;
-            margin-bottom: 2rem;
-            text-align: center;
-            color: #00d4ff;
-        }
-
-        .marketplace-tabs {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 2rem;
-            gap: 1rem;
-        }
-
-        .tab-button {
-            padding: 0.8rem 2rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 25px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .tab-button.active {
-            background: linear-gradient(45deg, #00d4ff, #0099cc);
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-        }
-
-        .listings-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .listing-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 1.5rem;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .listing-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.2);
-        }
-
-        .listing-ticker {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #00d4ff;
-            margin-bottom: 1rem;
-        }
-
-        .listing-details {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-        }
-
-        .listing-amount {
-            color: #4ecdc4;
-            font-weight: 600;
-        }
-
-        .listing-price {
-            color: #ff6b6b;
-            font-weight: 600;
-        }
-
-        .listing-total {
-            text-align: center;
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-            color: #ffffff;
-        }
-
-        .buy-button {
-            width: 100%;
-            padding: 0.8rem;
-            background: linear-gradient(45deg, #4ecdc4, #44a08d);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            cursor: pointer;
-            font-weight: 600;
-            transition: transform 0.3s;
-        }
-
-        .buy-button:hover {
-            transform: scale(1.02);
-        }
-
-        .create-listing-form {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #00d4ff;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 0.8rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            color: white;
-            font-size: 1rem;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #00d4ff;
-            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
-        }
-
-        .footer {
-            margin-top: 4rem;
-            padding: 2rem;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.5);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .footer a {
-            color: #00d4ff;
-            text-decoration: none;
-        }
-
-        .balance-section {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        .balance-title {
-            color: #00d4ff;
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
-        }
-
-        .balance-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #4ecdc4;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            font-size: 1.2rem;
-            opacity: 0.8;
-        }
-
-        .error {
-            color: #ff6b6b;
-            text-align: center;
-            padding: 1rem;
-            background: rgba(255, 107, 107, 0.1);
-            border-radius: 10px;
-            margin: 1rem 0;
-        }
-
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2rem;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MON-20 Marketplace — $MONS (Monad Testnet)</title>
+  <meta name="description" content="First inscription token marketplace for MON-20 on Monad Testnet — $MONS" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81'
             }
-            
-            .nav {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .nav-links {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
+          }
         }
-    </style>
+      }
+    }
+  </script>
+  <style>
+    html { color-scheme: dark; }
+    .glass { backdrop-filter: saturate(120%) blur(10px); background: rgba(17, 24, 39, .6); }
+    .card { @apply rounded-2xl shadow-lg border border-white/10 bg-slate-900/60; }
+    .btn { @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium border border-white/10 hover:border-white/20 transition; }
+    .btn-primary { @apply bg-brand-600 hover:bg-brand-500 text-white; }
+    .input { @apply w-full rounded-xl bg-slate-800/60 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-brand-500; }
+    .label { @apply text-sm text-slate-300 mb-1; }
+    .mono { font-variant-numeric: tabular-nums; }
+  </style>
 </head>
-<body>
-    <header class="header">
-        <nav class="nav">
-            <div class="logo">MON-20 Marketplace</div>
-            <ul class="nav-links">
-                <li><a href="#marketplace">Marketplace</a></li>
-                <li><a href="#create">Create Listing</a></li>
-                <li><a href="#stats">Stats</a></li>
-            </ul>
-            <button class="connect-wallet" onclick="connectWallet()">Connect Wallet</button>
-        </nav>
-    </header>
-
-    <section class="hero">
-        <h1>First Inscription Protocol on MONAD</h1>
-        <p>Trade MON-20 tokens on the most advanced inscription marketplace</p>
-        <p style="font-size: 0.9rem; opacity: 0.6;">$MONS • 21,000,000 Supply • 1000 MONS/mint • Chain ID: 10143</p>
-    </section>
-
-    <section class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-value" id="floorPrice">Loading...</div>
-            <div class="stat-label">Floor Price (MON)</div>
+<body class="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-slate-100">
+  <!-- Header -->
+  <header class="sticky top-0 z-40 glass border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-2xl bg-brand-600 grid place-items-center font-bold">M</div>
+        <div>
+          <h1 class="text-lg font-semibold">MON-20 Marketplace<span class="hidden sm:inline"> — $MONS</span></h1>
+          <p class="text-xs text-slate-400">Monad Testnet · Chain ID 10143</p>
         </div>
-        <div class="stat-card">
-            <div class="stat-value" id="volume24h">Loading...</div>
-            <div class="stat-label">24h Volume (MON)</div>
+      </div>
+      <div class="ml-auto flex items-center gap-2">
+        <div id="networkBadge" class="hidden sm:flex items-center gap-2 text-xs px-3 py-1 rounded-full bg-slate-800 border border-white/10">Network: <span class="font-medium" id="netName">—</span></div>
+        <div id="balanceBox" class="hidden sm:flex items-center gap-2 text-xs px-3 py-1 rounded-full bg-slate-800 border border-white/10 mono">MON: <span id="monBalance">0.00</span></div>
+        <button id="connectBtn" class="btn btn-primary">Connect Wallet</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="max-w-7xl mx-auto px-4 py-10">
+    <div class="grid lg:grid-cols-2 gap-6 items-stretch">
+      <div class="card p-6">
+        <h2 class="text-2xl font-bold">Trade MON-20 Inscriptions</h2>
+        <p class="text-slate-300 mt-2">First inscription token on Monad Testnet. Ticker <span class="font-semibold">$MONS</span>, total supply <span class="mono" id="supplyText">21,000,000</span>, limit <span class="mono">1,000</span> MONS / mint. Prices are in <strong>MON</strong>.</p>
+        <div class="mt-4 flex flex-wrap gap-2 text-xs text-slate-400">
+          <span class="px-2 py-1 rounded-full bg-slate-800 border border-white/10">Marketplace: <span class="mono">0xB28A…9fDa6</span></span>
+          <span class="px-2 py-1 rounded-full bg-slate-800 border border-white/10">MON-20: <span class="mono">0x0716…e5fA6</span></span>
+          <span class="px-2 py-1 rounded-full bg-slate-800 border border-white/10">Decimals: 18</span>
         </div>
-        <div class="stat-card">
-            <div class="stat-value" id="totalListings">Loading...</div>
-            <div class="stat-label">Total Listings</div>
+        <div class="mt-6 grid sm:grid-cols-3 gap-3">
+          <div class="card p-4">
+            <div class="text-xs text-slate-400">Minted</div>
+            <div class="text-2xl font-semibold mono" id="mintedStat">—</div>
+            <div class="text-xs text-slate-400" id="mintProgress">—</div>
+          </div>
+          <div class="card p-4">
+            <div class="text-xs text-slate-400">Holders</div>
+            <div class="text-2xl font-semibold mono" id="holdersStat">—</div>
+            <div class="text-xs text-slate-400">unique addresses</div>
+          </div>
+          <div class="card p-4">
+            <div class="text-xs text-slate-400">Floor Price</div>
+            <div class="text-2xl font-semibold mono" id="floorPrice">—</div>
+            <div class="text-xs text-slate-400">per MONS</div>
+          </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-value" id="totalMinted">Loading...</div>
-            <div class="stat-label">Total Minted MONS</div>
+        <div class="mt-3 grid sm:grid-cols-3 gap-3">
+          <div class="card p-4">
+            <div class="text-xs text-slate-400">24h Volume</div>
+            <div class="text-2xl font-semibold mono" id="vol24h">—</div>
+            <div class="text-xs text-slate-400">MON</div>
+          </div>
+          <div class="card p-4">
+            <div class="text-xs text-slate-400">Total Volume</div>
+            <div class="text-2xl font-semibold mono" id="volTotal">—</div>
+            <div class="text-xs text-slate-400">MON</div>
+          </div>
+          <div class="card p-4">
+            <div class="text-xs text-slate-400">Active Listings</div>
+            <div class="text-2xl font-semibold mono" id="activeListings">—</div>
+            <div class="text-xs text-slate-400">for MONS</div>
+          </div>
         </div>
-    </section>
+      </div>
 
-    <main class="main-content">
-        <div class="balance-section" id="balanceSection" style="display: none;">
-            <div class="balance-title">Your MONS Balance</div>
-            <div class="balance-value" id="userBalance">0</div>
-            <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8; text-align: center;">
-                Need more MONS? Mint directly from the 
-                <a href="#" style="color: #00d4ff;" onclick="openMintInfo()">MON-20 Contract</a>
-            </p>
+      <!-- Quick Mint Card -->
+      <div class="card p-6">
+        <h3 class="text-xl font-semibold">Quick Mint — $MONS</h3>
+        <p class="text-sm text-slate-300">Mint direct from the MON-20 contract on Monad Testnet.</p>
+        <div class="mt-4 grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="label">Amount (MONS)</label>
+            <input id="mintAmount" class="input mono" type="number" min="1" step="1" placeholder="e.g. 1000" value="1000" />
+            <p class="text-xs text-slate-400 mt-1">Limit per mint: <span class="mono" id="limitPerMint">—</span></p>
+          </div>
+          <div>
+            <label class="label">Mint Fee (MON)</label>
+            <input id="mintFeeDisplay" class="input mono" type="text" disabled value="—" />
+            <p class="text-xs text-slate-400 mt-1">Fee is paid in MON native.</p>
+          </div>
         </div>
+        <div class="mt-4 flex gap-3">
+          <button id="mintBtn" class="btn btn-primary">Mint</button>
+          <button id="refreshBtn" class="btn">Refresh Stats</button>
+        </div>
+        <p id="mintMsg" class="text-xs text-slate-400 mt-3"></p>
+      </div>
+    </div>
+  </section>
 
-        <section id="marketplace">
-            <h2 class="section-title">Marketplace</h2>
-            
-            <div class="marketplace-tabs">
-                <button class="tab-button active" onclick="switchTab('listings')">Active Listings</button>
-                <button class="tab-button" onclick="switchTab('history')">Trade History</button>
-            </div>
+  <!-- Marketplace -->
+  <section class="max-w-7xl mx-auto px-4 pb-20">
+    <div class="flex items-end justify-between gap-3 mb-3">
+      <div>
+        <h3 class="text-xl font-semibold">Live Listings — $MONS</h3>
+        <p class="text-slate-400 text-sm">Buy and sell MONS inscriptions. Prices in MON.</p>
+      </div>
+      <div class="flex gap-2">
+        <button id="sellOpenBtn" class="btn btn-primary">Create Listing</button>
+        <button id="myListingsBtn" class="btn">My Listings</button>
+      </div>
+    </div>
 
-            <div id="listings-content">
-                <div class="listings-grid" id="listingsGrid">
-                    <div class="loading">Loading listings...</div>
-                </div>
-            </div>
+    <div class="card overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-800/60">
+            <tr class="text-left text-slate-300">
+              <th class="px-4 py-3">Listing ID</th>
+              <th class="px-4 py-3">Seller</th>
+              <th class="px-4 py-3">Amount (MONS)</th>
+              <th class="px-4 py-3">Price / MONS (MON)</th>
+              <th class="px-4 py-3">Created</th>
+              <th class="px-4 py-3">Action</th>
+            </tr>
+          </thead>
+          <tbody id="listingsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 
-            <div id="history-content" style="display: none;">
-                <div class="loading">Loading trade history...</div>
-            </div>
-        </section>
+  <!-- Sell Modal -->
+  <div id="sellModal" class="fixed inset-0 hidden place-items-center bg-black/60 p-4">
+    <div class="card w-full max-w-lg p-6">
+      <div class="flex items-center justify-between">
+        <h4 class="text-lg font-semibold">Create Listing</h4>
+        <button class="btn" onclick="toggleSell(false)">✕</button>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4 mt-4">
+        <div>
+          <label class="label">Ticker</label>
+          <input class="input" value="MONS" disabled />
+          <p class="text-xs text-slate-400 mt-1">Only MONS supported.</p>
+        </div>
+        <div>
+          <label class="label">Your MONS Balance</label>
+          <input id="userMonsBal" class="input mono" value="—" disabled />
+        </div>
+        <div>
+          <label class="label">Amount to List (MONS)</label>
+          <input id="sellAmount" class="input mono" type="number" min="1" step="1" placeholder="e.g. 1000" />
+        </div>
+        <div>
+          <label class="label">Price per MONS (MON)</label>
+          <input id="sellPrice" class="input mono" type="number" min="0" step="0.000000000000000001" placeholder="e.g. 0.01" />
+        </div>
+      </div>
+      <div class="mt-5 flex gap-3">
+        <button id="createListingBtn" class="btn btn-primary">List for Sale</button>
+        <button class="btn" onclick="toggleSell(false)">Cancel</button>
+      </div>
+      <p id="sellMsg" class="text-xs text-slate-400 mt-3"></p>
+    </div>
+  </div>
 
-        <section id="create" class="create-listing-form">
-            <h2 class="section-title">Create Listing</h2>
-            
-            <div class="form-group">
-                <label for="listingTicker">Ticker</label>
-                <input type="text" id="listingTicker" value="MONS" readonly>
-            </div>
-            
-            <div class="form-group">
-                <label for="listingAmount">Amount</label>
-                <input type="number" id="listingAmount" placeholder="Enter amount to sell" min="1">
-            </div>
-            
-            <div class="form-group">
-                <label for="listingPrice">Price per Token (MON)</label>
-                <input type="number" id="listingPrice" placeholder="Enter price per token" step="0.000001">
-            </div>
-            
-            <button class="buy-button" onclick="createListing()">Create Listing</button>
-        </section>
-    </main>
+  <footer class="border-t border-white/10 py-8 text-center text-sm text-slate-400">
+    Created by <a class="underline hover:text-slate-200" href="https://x.com/ega_2ez4crypto" target="_blank" rel="noopener">@ega_2ez4crypto</a> · Contract: <span class="mono">0x07169f0F890C3595421512D98DC79b8bce6E5fA6</span>
+  </footer>
 
-    <footer class="footer">
-        <p>Created by <a href="https://x.com/ega_2ez4crypto" target="_blank">@ega_2ez4crypto</a></p>
-        <p>MON-20 Contract: <a href="#" target="_blank">0x07169f0F890C3595421512D98DC79b8bce6E5fA6</a></p>
-        <p>Marketplace Contract: <a href="#" target="_blank">0xB28AC2AfADCcc79cd74c487BEE0a841bBE89fDa6</a></p>
-    </footer>
+  <!-- Ethers v6 -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+  <script>
+  ;(function(){
+    const MARKETPLACE_ADDR = "0xB28AC2AfADCcc79cd74c487BEE0a841bBE89fDa6"; // marketplace
+    const MON20_ADDR       = "0x07169f0F890C3595421512D98DC79b8bce6E5fA6"; // MON-20 inscription
+    const RPC_URL          = "https://testnet-rpc.monad.xyz";
+    const CHAIN_ID_DEC     = 10143;
+    const CHAIN_ID_HEX     = "0x" + CHAIN_ID_DEC.toString(16);
+    const TICKER           = "MONS";
+    const DECIMALS         = 18;
 
-    <script>
-        // Contract addresses and configuration
-        const MONAD_TESTNET = {
-            chainId: 10143,
-            rpc: 'https://testnet-rpc.monad.xyz',
-            name: 'MONAD Testnet'
-        };
+    // ABIs (trimmed to what's needed)
+    const MARKETPLACE_ABI = [
+      {"inputs":[{"internalType":"string","name":"ticker","type":"string"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"pricePerToken","type":"uint256"}],"name":"createListing","outputs":[],"stateMutability":"nonpayable","type":"function"},
+      {"inputs":[{"internalType":"uint256","name":"listingId","type":"uint256"}],"name":"cancelListing","outputs":[],"stateMutability":"nonpayable","type":"function"},
+      {"inputs":[{"internalType":"uint256","name":"listingId","type":"uint256"},{"internalType":"uint256","name":"amountToBuy","type":"uint256"}],"name":"purchaseInscriptions","outputs":[],"stateMutability":"payable","type":"function"},
+      {"inputs":[{"internalType":"uint256","name":"listingId","type":"uint256"},{"internalType":"uint256","name":"newPricePerToken","type":"uint256"}],"name":"updatePrice","outputs":[],"stateMutability":"nonpayable","type":"function"},
+      {"inputs":[{"internalType":"string","name":"ticker","type":"string"}],"name":"getActiveListingsForTicker","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"},
+      {"inputs":[{"internalType":"uint256","name":"listingId","type":"uint256"}],"name":"getListing","outputs":[{"internalType":"address","name":"seller","type":"address"},{"internalType":"string","name":"ticker","type":"string"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"pricePerToken","type":"uint256"},{"internalType":"bool","name":"active","type":"bool"},{"internalType":"uint256","name":"createdAt","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[],"name":"getActiveListingsCount","outputs":[{"internalType":"uint256","name":"count","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[],"name":"getTotalListingsCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[],"name":"nextListingId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[],"name":"FEE_PERCENTAGE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[],"name":"BASIS_POINTS","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+      // events
+      {"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"listingId","type":"uint256"},{"indexed":true,"internalType":"address","name":"buyer","type":"address"},{"indexed":true,"internalType":"address","name":"seller","type":"address"},{"indexed":false,"internalType":"string","name":"ticker","type":"string"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"totalPrice","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"fee","type":"uint256"}],"name":"InscriptionsPurchased","type":"event"},
+      {"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"listingId","type":"uint256"},{"indexed":true,"internalType":"address","name":"seller","type":"address"},{"indexed":false,"internalType":"string","name":"ticker","type":"string"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"pricePerToken","type":"uint256"}],"name":"ListingCreated","type":"event"}
+    ];
 
-        const MARKETPLACE_ADDRESS = '0xB28AC2AfADCcc79cd74c487BEE0a841bBE89fDa6';
-        const TOKEN_ADDRESS = '0x07169f0F890C3595421512D98DC79b8bce6E5fA6';
+    const MON20_ABI = [
+      {"inputs":[{"internalType":"string","name":"tick","type":"string"}],"name":"getTokenInfo","outputs":[{"internalType":"uint256","name":"maxSupply","type":"uint256"},{"internalType":"uint256","name":"limitPerMint","type":"uint256"},{"internalType":"uint256","name":"minted","type":"uint256"},{"internalType":"address","name":"deployer","type":"address"},{"internalType":"uint256","name":"holdersCount","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[{"internalType":"string","name":"tick","type":"string"}],"name":"getTotalMinted","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[{"internalType":"string","name":"tick","type":"string"}],"name":"getHoldersCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[{"internalType":"address","name":"user","type":"address"},{"internalType":"string","name":"tick","type":"string"}],"name":"getBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[],"name":"mintFee","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+      {"inputs":[{"internalType":"string","name":"tick","type":"string"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"mint","outputs":[],"stateMutability":"payable","type":"function"}
+    ];
 
-        // MON-20 Inscription Contract ABI (simplified for balance checking)
-        const MON20_ABI = [
-            {
-                "inputs": [
-                    {"internalType": "address", "name": "user", "type": "address"},
-                    {"internalType": "string", "name": "tick", "type": "string"}
-                ],
-                "name": "getBalance",
-                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [
-                    {"internalType": "address", "name": "", "type": "address"},
-                    {"internalType": "string", "name": "", "type": "string"}
-                ],
-                "name": "balances",
-                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [{"internalType": "string", "name": "tick", "type": "string"}],
-                "name": "getTotalMinted",
-                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [{"internalType": "string", "name": "tick", "type": "string"}],
-                "name": "getTokenInfo",
-                "outputs": [
-                    {"internalType": "uint256", "name": "maxSupply", "type": "uint256"},
-                    {"internalType": "uint256", "name": "limitPerMint", "type": "uint256"},
-                    {"internalType": "uint256", "name": "minted", "type": "uint256"},
-                    {"internalType": "address", "name": "deployer", "type": "address"},
-                    {"internalType": "uint256", "name": "holdersCount", "type": "uint256"}
-                ],
-                "stateMutability": "view",
-                "type": "function"
-            }
-        ];
+    // State
+    let provider, readProvider, signer, accounts = [];
+    let marketplaceRead, marketplaceWrite, mon20Read, mon20Write;
 
-        // ABI for marketplace contract (from your provided ABI)
-        const MARKETPLACE_ABI = [
-            {
-                "inputs": [
-                    {"internalType": "string[]", "name": "tickers", "type": "string[]"},
-                    {"internalType": "uint256[]", "name": "amounts", "type": "uint256[]"},
-                    {"internalType": "string[]", "name": "inscriptionDatas", "type": "string[]"}
-                ],
-                "name": "batchMintInscriptions",
-                "outputs": [],
-                "stateMutability": "payable",
-                "type": "function"
-            },
-            {
-                "inputs": [{"internalType": "uint256", "name": "listingId", "type": "uint256"}],
-                "name": "cancelListing",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "inputs": [
-                    {"internalType": "string", "name": "ticker", "type": "string"},
-                    {"internalType": "uint256", "name": "amount", "type": "uint256"},
-                    {"internalType": "uint256", "name": "pricePerToken", "type": "uint256"}
-                ],
-                "name": "createListing",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "inputs": [
-                    {"internalType": "uint256", "name": "listingId", "type": "uint256"},
-                    {"internalType": "uint256", "name": "amountToBuy", "type": "uint256"}
-                ],
-                "name": "purchaseInscriptions",
-                "outputs": [],
-                "stateMutability": "payable",
-                "type": "function"
-            },
-            {
-                "inputs": [
-                    {"internalType": "address", "name": "account", "type": "address"},
-                    {"internalType": "string", "name": "ticker", "type": "string"}
-                ],
-                "name": "balanceOf",
-                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [],
-                "name": "getActiveListingsCount",
-                "outputs": [{"internalType": "uint256", "name": "count", "type": "uint256"}],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [{"internalType": "string", "name": "ticker", "type": "string"}],
-                "name": "getActiveListingsForTicker",
-                "outputs": [{"internalType": "uint256[]", "name": "", "type": "uint256[]"}],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [{"internalType": "uint256", "name": "listingId", "type": "uint256"}],
-                "name": "getListing",
-                "outputs": [
-                    {"internalType": "address", "name": "seller", "type": "address"},
-                    {"internalType": "string", "name": "ticker", "type": "string"},
-                    {"internalType": "uint256", "name": "amount", "type": "uint256"},
-                    {"internalType": "uint256", "name": "pricePerToken", "type": "uint256"},
-                    {"internalType": "bool", "name": "active", "type": "bool"},
-                    {"internalType": "uint256", "name": "createdAt", "type": "uint256"}
-                ],
-                "stateMutability": "view",
-                "type": "function"
-            }
-        ];
+    const fmtMon = v => {
+      try { return ethers.formatEther(v); } catch { return "0" }
+    }
+    const toWei = v => ethers.parseEther(String(v || 0));
+    const toUnit = v => ethers.parseUnits(String(v || 0), DECIMALS);
+    const fmtMons = v => {
+      try { return ethers.formatUnits(v, DECIMALS); } catch { return "0" }
+    }
+    const short = (addr) => addr ? addr.slice(0,6)+"…"+addr.slice(-4) : "—";
+    const el = id => document.getElementById(id);
 
-        // Global variables
-        let provider = null;
-        let signer = null;
-        let marketplaceContract = null;
-        let tokenContract = null;
-        let userAccount = null;
-
-        // Initialize the application
-        async function init() {
-            try {
-                if (typeof window.ethereum !== 'undefined') {
-                    provider = new ethers.BrowserProvider(window.ethereum);
-                    
-                    // Check if already connected
-                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                    if (accounts.length > 0) {
-                        await connectWallet();
-                    }
-                }
-                
-                await loadMarketplaceData();
-                setInterval(loadMarketplaceData, 30000); // Refresh every 30 seconds
-            } catch (error) {
-                console.error('Initialization error:', error);
-            }
+    async function ensureChain() {
+      if (!window.ethereum) return false;
+      const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+      if (chainId !== CHAIN_ID_HEX) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: CHAIN_ID_HEX,
+              chainName: 'Monad Testnet',
+              nativeCurrency: { name: 'MON', symbol: 'MON', decimals: 18 },
+              rpcUrls: [RPC_URL],
+              blockExplorerUrls: []
+            }]
+          });
+        } catch (e) {
+          console.warn('add chain error', e);
+          return false;
         }
+      }
+      return true;
+    }
 
-        // Connect wallet function
-        async function connectWallet() {
-            try {
-                if (!provider) {
-                    alert('Please install MetaMask or another Web3 wallet');
-                    return;
-                }
+    async function connect() {
+      if (!window.ethereum) { alert('No wallet found. Please install MetaMask.'); return; }
+      const ok = await ensureChain();
+      if (!ok) return;
+      accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      provider = new ethers.BrowserProvider(window.ethereum);
+      signer = await provider.getSigner();
+      readProvider = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID_DEC);
 
-                // Request account access
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-                
-                // Get the signer
-                signer = await provider.getSigner();
-                userAccount = await signer.getAddress();
-                
-                // Check if we're on the correct network
-                const network = await provider.getNetwork();
-                if (Number(network.chainId) !== MONAD_TESTNET.chainId) {
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: `0x${MONAD_TESTNET.chainId.toString(16)}` }],
-                        });
-                    } catch (switchError) {
-                        // Network doesn't exist, add it
-                        if (switchError.code === 4902) {
-                            await window.ethereum.request({
-                                method: 'wallet_addEthereumChain',
-                                params: [{
-                                    chainId: `0x${MONAD_TESTNET.chainId.toString(16)}`,
-                                    chainName: MONAD_TESTNET.name,
-                                    rpcUrls: [MONAD_TESTNET.rpc],
-                                    nativeCurrency: {
-                                        name: 'MON',
-                                        symbol: 'MON',
-                                        decimals: 18
-                                    }
-                                }]
-                            });
-                        }
-                    }
-                }
-                
-                // Create contract instances
-                marketplaceContract = new ethers.Contract(MARKETPLACE_ADDRESS, MARKETPLACE_ABI, signer);
-                tokenContract = new ethers.Contract(TOKEN_ADDRESS, MON20_ABI, signer);
-                
-                // Update UI
-                document.querySelector('.connect-wallet').textContent = 
-                    `${userAccount.slice(0, 6)}...${userAccount.slice(-4)}`;
-                
-                // Load user balance
-                await loadUserBalance();
-                
-                console.log('Wallet connected:', userAccount);
-            } catch (error) {
-                console.error('Error connecting wallet:', error);
-                alert('Error connecting wallet: ' + error.message);
-            }
+      marketplaceWrite = new ethers.Contract(MARKETPLACE_ADDR, MARKETPLACE_ABI, signer);
+      marketplaceRead  = new ethers.Contract(MARKETPLACE_ADDR, MARKETPLACE_ABI, readProvider);
+      mon20Write = new ethers.Contract(MON20_ADDR, MON20_ABI, signer);
+      mon20Read  = new ethers.Contract(MON20_ADDR, MON20_ABI, readProvider);
+
+      const net = await provider.getNetwork();
+      el('netName').textContent = net.name || 'Monad Testnet';
+      el('networkBadge').style.display = 'flex';
+      const bal = await provider.getBalance(accounts[0]);
+      el('monBalance').textContent = Number(fmtMon(bal)).toFixed(4);
+      el('balanceBox').style.display = 'flex';
+      el('connectBtn').textContent = short(accounts[0]);
+
+      await refreshAll();
+    }
+
+    async function refreshAll(){
+      await Promise.all([
+        loadMonsStats(),
+        loadListings(),
+        loadVolumes()
+      ]).catch(console.error);
+      // also set user balance in sell modal
+      try {
+        if (accounts[0]) {
+          const balMons = await mon20Read.getBalance(accounts[0], TICKER);
+          el('userMonsBal').value = Number(fmtMons(balMons)).toLocaleString();
         }
+      } catch {}
+    }
 
-        // Load user balance
-        async function loadUserBalance() {
-            if (!userAccount) return;
-            
-            try {
-                // Create read-only provider for token contract
-                const readProvider = new ethers.JsonRpcProvider(MONAD_TESTNET.rpc);
-                const readTokenContract = new ethers.Contract(TOKEN_ADDRESS, MON20_ABI, readProvider);
-                
-                // Try multiple methods to get balance
-                let balance = 0;
-                
-                try {
-                    // Method 1: Try getBalance function
-                    balance = await readTokenContract.getBalance(userAccount, "MONS");
-                } catch (e1) {
-                    try {
-                        // Method 2: Try balances mapping directly
-                        balance = await readTokenContract.balances(userAccount, "MONS");
-                    } catch (e2) {
-                        try {
-                            // Method 3: Try marketplace contract balanceOf
-                            if (marketplaceContract) {
-                                balance = await marketplaceContract.balanceOf(userAccount, "MONS");
-                            }
-                        } catch (e3) {
-                            console.error('All balance methods failed:', { e1: e1.message, e2: e2.message, e3: e3.message });
-                            // Set balance to 0 if all methods fail
-                            balance = 0;
-                        }
-                    }
-                }
-                
-                const formattedBalance = ethers.formatEther(balance);
-                const numericBalance = Number(formattedBalance);
-                
-                // Show balance with appropriate decimal places
-                let displayBalance;
-                if (numericBalance === 0) {
-                    displayBalance = "0";
-                } else if (numericBalance < 0.000001) {
-                    displayBalance = numericBalance.toFixed(12); // Show more decimals for very small amounts
-                } else if (numericBalance < 1) {
-                    displayBalance = numericBalance.toFixed(6);
-                } else {
-                    displayBalance = numericBalance.toLocaleString();
-                }
-                
-                document.getElementById('userBalance').textContent = displayBalance;
-                document.getElementById('balanceSection').style.display = 'block';
-                
-                // Store balance for use in other functions
-                window.userMonsBalance = balance;
-                
-                console.log('User MONS balance:', formattedBalance, 'Raw:', balance.toString());
-                
-            } catch (error) {
-                console.error('Error loading balance:', error);
-                document.getElementById('userBalance').textContent = '0';
-                document.getElementById('balanceSection').style.display = 'block';
-            }
+    async function loadMonsStats(){
+      try {
+        const info = await mon20Read.getTokenInfo(TICKER);
+        const maxSupply = info.maxSupply;
+        const limitPerMint = info.limitPerMint;
+        const minted = info.minted; // already 18d
+        const holders = info.holdersCount;
+        const pct = maxSupply > 0n ? (minted * 100n) / maxSupply : 0n;
+
+        el('mintedStat').textContent = Number(fmtMons(minted)).toLocaleString();
+        el('holdersStat').textContent = holders.toString();
+        el('mintProgress').textContent = `${pct.toString()}% of ${Number(fmtMons(maxSupply)).toLocaleString()} MONS`;
+        el('limitPerMint').textContent = Number(fmtMons(limitPerMint));
+
+        // Mint fee
+        const mfee = await mon20Read.mintFee();
+        el('mintFeeDisplay').value = fmtMon(mfee);
+      } catch (e) {
+        console.error('loadMonsStats', e);
+      }
+    }
+
+    function rowHtml({id, seller, amount, pricePerToken, createdAt}){
+      const date = new Date(Number(createdAt) * 1000);
+      const price = Number(fmtMon(pricePerToken));
+      const amt = Number(fmtMons(amount));
+      return `<tr class="border-t border-white/5">
+        <td class="px-4 py-3 mono">#${id}</td>
+        <td class="px-4 py-3 mono">${short(seller)}</td>
+        <td class="px-4 py-3 mono">${amt.toLocaleString()}</td>
+        <td class="px-4 py-3 mono">${price}</td>
+        <td class="px-4 py-3 text-slate-300">${date.toLocaleString()}</td>
+        <td class="px-4 py-3">
+          <div class="flex gap-2">
+            <input class="input mono w-28" type="number" min="1" step="1" id="buyAmt-${id}" placeholder="Amount"/>
+            <button class="btn btn-primary" onclick="buy(${id})">Buy</button>
+            <button class="btn" onclick="cancel(${id})">Cancel</button>
+          </div>
+        </td>
+      </tr>`
+    }
+
+    async function loadListings(){
+      try {
+        const ids = await marketplaceRead.getActiveListingsForTicker(TICKER);
+        el('activeListings').textContent = ids.length.toString();
+
+        const details = await Promise.all(ids.map(async (id) => {
+          const L = await marketplaceRead.getListing(id);
+          return { id: Number(id), seller: L.seller, ticker: L.ticker, amount: L.amount, pricePerToken: L.pricePerToken, active: L.active, createdAt: L.createdAt };
+        }));
+
+        // floor price
+        let floor = null;
+        for (const d of details) {
+          if (!floor || d.pricePerToken < floor) floor = d.pricePerToken;
         }
+        el('floorPrice').textContent = floor ? Number(fmtMon(floor)) : '—';
 
-        // Load marketplace data
-        async function loadMarketplaceData() {
-            try {
-                // Create read-only provider for loading data
-                const readProvider = new ethers.JsonRpcProvider(MONAD_TESTNET.rpc);
-                const readContract = new ethers.Contract(MARKETPLACE_ADDRESS, MARKETPLACE_ABI, readProvider);
-                
-                await Promise.all([
-                    loadStats(readContract),
-                    loadListings(readContract)
-                ]);
-            } catch (error) {
-                console.error('Error loading marketplace data:', error);
-            }
+        // render table
+        el('listingsBody').innerHTML = details
+          .sort((a,b)=> Number(a.pricePerToken) - Number(b.pricePerToken))
+          .map(rowHtml).join('');
+      } catch (e) { console.error('loadListings', e); }
+    }
+
+    async function loadVolumes(){
+      try {
+        // Build iface for event
+        const iface = new ethers.Interface(MARKETPLACE_ABI);
+        const topic = iface.getEvent("InscriptionsPurchased").topicHash;
+        const latest = await readProvider.getBlockNumber();
+        const span = 200_000; // look back blocks for performance
+        const from = Math.max(0, latest - span);
+        const logs = await readProvider.getLogs({ address: MARKETPLACE_ADDR, fromBlock: from, toBlock: latest, topics: [topic] });
+
+        let total = 0n, day = 0n;
+        const now = Math.floor(Date.now()/1000);
+        for (const log of logs) {
+          const ev = iface.decodeEventLog("InscriptionsPurchased", log.data, log.topics);
+          // ev: listingId, buyer, seller, ticker, amount, totalPrice, fee
+          if (ev.ticker !== TICKER) continue;
+          total += ev.totalPrice;
+          // get block timestamp
+          const blk = await readProvider.getBlock(log.blockHash);
+          if (blk && (now - Number(blk.timestamp)) <= 86400) day += ev.totalPrice;
         }
+        el('volTotal').textContent = Number(fmtMon(total)).toFixed(4);
+        el('vol24h').textContent = Number(fmtMon(day)).toFixed(4);
+      } catch (e) { console.warn('volume scan limited', e); }
+    }
 
-        // Load statistics
-        async function loadStats(contract) {
-            try {
-                const readProvider = new ethers.JsonRpcProvider(MONAD_TESTNET.rpc);
-                const readTokenContract = new ethers.Contract(TOKEN_ADDRESS, MON20_ABI, readProvider);
-                
-                const activeListingsCount = await contract.getActiveListingsCount();
-                const activeListings = await contract.getActiveListingsForTicker("MONS");
-                
-                let floorPrice = "0.000000";
-                let totalVolume = "0";
-                let totalMinted = "0";
-                
-                // Get total minted from token contract
-                try {
-                    const mintedAmount = await readTokenContract.getTotalMinted("MONS");
-                    totalMinted = ethers.formatEther(mintedAmount);
-                } catch (e) {
-                    // Try getTokenInfo method
-                    try {
-                        const tokenInfo = await readTokenContract.getTokenInfo("MONS");
-                        totalMinted = ethers.formatEther(tokenInfo.minted);
-                    } catch (e2) {
-                        console.error('Could not get total minted:', e2.message);
-                        totalMinted = "Loading...";
-                    }
-                }
-                
-                // Calculate floor price by checking all active listings
-                if (activeListings.length > 0) {
-                    let minPrice = ethers.MaxUint256;
-                    
-                    for (let i = 0; i < activeListings.length; i++) {
-                        try {
-                            const listing = await contract.getListing(activeListings[i]);
-                            if (listing.active && listing.pricePerToken < minPrice) {
-                                minPrice = listing.pricePerToken;
-                            }
-                        } catch (e) {
-                            // Skip invalid listings
-                        }
-                    }
-                    
-                    if (minPrice !== ethers.MaxUint256) {
-                        floorPrice = ethers.formatEther(minPrice);
-                    }
-                }
-                
-                // Update UI
-                document.getElementById('floorPrice').textContent = 
-                    Number(floorPrice).toFixed(6);
-                document.getElementById('volume24h').textContent = totalVolume;
-                document.getElementById('totalListings').textContent = 
-                    Number(activeListingsCount).toLocaleString();
-                document.getElementById('totalMinted').textContent = 
-                    totalMinted === "Loading..." ? totalMinted : Number(totalMinted).toLocaleString();
-                    
-            } catch (error) {
-                console.error('Error loading stats:', error);
-            }
-        }
+    // Actions
+    async function buy(id){
+      try {
+        if (!signer) await connect();
+        const L = await marketplaceRead.getListing(id);
+        const amtInput = document.getElementById(`buyAmt-${id}`);
+        const amountToBuy = toUnit(amtInput.value || 0);
+        if (amountToBuy <= 0n) { alert('Enter amount to buy'); return; }
+        if (amountToBuy > L.amount) { alert('Amount exceeds listing'); return; }
+        const totalValue = (L.pricePerToken * amountToBuy) / 10n**BigInt(DECIMALS);
+        const tx = await marketplaceWrite.purchaseInscriptions(id, amountToBuy, { value: totalValue });
+        el('mintMsg').textContent = 'Purchasing… tx sent: ' + tx.hash;
+        await tx.wait();
+        await refreshAll();
+      } catch (e) { alert('Buy failed: ' + (e?.message || e)); }
+    }
 
-        // Load active listings
-        async function loadListings(contract) {
-            try {
-                const activeListings = await contract.getActiveListingsForTicker("MONS");
-                const listingsGrid = document.getElementById('listingsGrid');
-                
-                if (activeListings.length === 0) {
-                    listingsGrid.innerHTML = '<div class="loading">No active listings found</div>';
-                    return;
-                }
-                
-                let listingsHTML = '';
-                
-                for (let i = 0; i < activeListings.length; i++) {
-                    try {
-                        const listing = await contract.getListing(activeListings[i]);
-                        
-                        if (listing.active) {
-                            const amount = ethers.formatEther(listing.amount);
-                            const pricePerToken = ethers.formatEther(listing.pricePerToken);
-                            const totalPrice = (Number(amount) * Number(pricePerToken)).toFixed(6);
-                            
-                            listingsHTML += `
-                                <div class="listing-card">
-                                    <div class="listing-ticker">MONS</div>
-                                    <div class="listing-details">
-                                        <span class="listing-amount">${Number(amount).toLocaleString()} MONS</span>
-                                        <span class="listing-price">${Number(pricePerToken).toFixed(6)} MON</span>
-                                    </div>
-                                    <div class="listing-total">Total: ${totalPrice} MON</div>
-                                    <button class="buy-button" onclick="buyInscription(${activeListings[i]}, '${amount}', '${totalPrice}')">
-                                        Buy Now
-                                    </button>
-                                </div>
-                            `;
-                        }
-                    } catch (e) {
-                        // Skip invalid listings
-                    }
-                }
-                
-                listingsGrid.innerHTML = listingsHTML || '<div class="loading">No valid listings found</div>';
-                
-            } catch (error) {
-                console.error('Error loading listings:', error);
-                document.getElementById('listingsGrid').innerHTML = 
-                    '<div class="error">Error loading listings</div>';
-            }
-        }
+    async function cancel(id){
+      try {
+        if (!signer) await connect();
+        const L = await marketplaceRead.getListing(id);
+        if ((accounts[0]||'').toLowerCase() !== L.seller.toLowerCase()) { alert('Only seller can cancel'); return; }
+        const tx = await marketplaceWrite.cancelListing(id);
+        el('sellMsg').textContent = 'Cancel tx: '+tx.hash;
+        await tx.wait();
+        await refreshAll();
+      } catch (e) { alert('Cancel failed: ' + (e?.message || e)); }
+    }
 
-        // Create a new listing
-        async function createListing() {
-            if (!marketplaceContract || !signer) {
-                alert('Please connect your wallet first');
-                return;
-            }
-            
-            const ticker = document.getElementById('listingTicker').value;
-            const amount = document.getElementById('listingAmount').value;
-            const pricePerToken = document.getElementById('listingPrice').value;
-            
-            if (!amount || !pricePerToken || amount <= 0 || pricePerToken <= 0) {
-                alert('Please enter valid amount and price');
-                return;
-            }
-            
-            try {
-                const amountWei = ethers.parseEther(amount);
-                const priceWei = ethers.parseEther(pricePerToken);
-                
-                const tx = await marketplaceContract.createListing(ticker, amountWei, priceWei);
-                
-                alert('Transaction sent! Waiting for confirmation...');
-                console.log('Transaction hash:', tx.hash);
-                
-                await tx.wait();
-                
-                alert('Listing created successfully!');
-                
-                // Clear form
-                document.getElementById('listingAmount').value = '';
-                document.getElementById('listingPrice').value = '';
-                
-                // Reload data
-                await loadMarketplaceData();
-                
-            } catch (error) {
-                console.error('Error creating listing:', error);
-                alert('Error creating listing: ' + error.message);
-            }
-        }
+    function toggleSell(open){
+      el('sellModal').style.display = open ? 'grid' : 'none';
+    }
 
-        // Buy inscription
-        async function buyInscription(listingId, amount, totalPrice) {
-            if (!marketplaceContract || !signer) {
-                alert('Please connect your wallet first');
-                return;
-            }
-            
-            if (!confirm(`Buy ${amount} MONS for ${totalPrice} MON?`)) {
-                return;
-            }
-            
-            try {
-                const totalPriceWei = ethers.parseEther(totalPrice);
-                const amountWei = ethers.parseEther(amount);
-                
-                const tx = await marketplaceContract.purchaseInscriptions(
-                    listingId, 
-                    amountWei,
-                    { value: totalPriceWei }
-                );
-                
-                alert('Transaction sent! Waiting for confirmation...');
-                console.log('Transaction hash:', tx.hash);
-                
-                await tx.wait();
-                
-                alert('Purchase successful!');
-                
-                // Reload data
-                await Promise.all([
-                    loadMarketplaceData(),
-                    loadUserBalance()
-                ]);
-                
-            } catch (error) {
-                console.error('Error buying inscription:', error);
-                alert('Error buying inscription: ' + error.message);
-            }
-        }
+    async function createListing(){
+      try {
+        if (!signer) await connect();
+        const amount = toUnit(el('sellAmount').value || 0);
+        const pricePer = toWei(el('sellPrice').value || 0);
+        if (amount <= 0n) { alert('Enter amount'); return; }
+        if (pricePer <= 0n) { alert('Enter price'); return; }
+        const tx = await marketplaceWrite.createListing(TICKER, amount, pricePer);
+        el('sellMsg').textContent = 'Listing tx: '+tx.hash;
+        await tx.wait();
+        toggleSell(false);
+        await refreshAll();
+      } catch (e) { alert('Create listing failed: ' + (e?.message || e)); }
+    }
 
-        // Switch tabs
-        function switchTab(tab) {
-            const buttons = document.querySelectorAll('.tab-button');
-            buttons.forEach(btn => btn.classList.remove('active'));
-            
-            if (tab === 'listings') {
-                document.getElementById('listings-content').style.display = 'block';
-                document.getElementById('history-content').style.display = 'none';
-                buttons[0].classList.add('active');
-            } else {
-                document.getElementById('listings-content').style.display = 'none';
-                document.getElementById('history-content').style.display = 'block';
-                buttons[1].classList.add('active');
-            }
-        }
+    async function quickMint(){
+      try {
+        if (!signer) await connect();
+        const amtInt = parseInt(el('mintAmount').value || '0', 10);
+        if (!amtInt || amtInt <= 0) { alert('Enter a mint amount'); return; }
+        const info = await mon20Read.getTokenInfo(TICKER);
+        const lim = Number(fmtMons(info.limitPerMint));
+        if (amtInt > lim) { alert('Exceeds limit per mint'); return; }
+        const fee = await mon20Read.mintFee();
+        const tx = await mon20Write.mint(TICKER, toUnit(amtInt), { value: fee });
+        el('mintMsg').textContent = 'Mint tx: '+tx.hash;
+        await tx.wait();
+        await refreshAll();
+      } catch (e) { alert('Mint failed: ' + (e?.message || e)); }
+    }
 
-        // Initialize when page loads
-        window.addEventListener('load', init);
+    // My listings filter
+    async function showMyListings(){
+      try {
+        const ids = await marketplaceRead.getActiveListingsForTicker(TICKER);
+        const details = await Promise.all(ids.map(async (id) => {
+          const L = await marketplaceRead.getListing(id);
+          return { id: Number(id), seller: L.seller, ticker: L.ticker, amount: L.amount, pricePerToken: L.pricePerToken, active: L.active, createdAt: L.createdAt };
+        }));
+        const mine = details.filter(d => (accounts[0]||'').toLowerCase() === d.seller.toLowerCase());
+        el('listingsBody').innerHTML = mine.map(rowHtml).join('') || `<tr><td class='px-4 py-6 text-center text-slate-400' colspan='6'>No listings by you yet.</td></tr>`;
+      } catch (e) { console.error(e); }
+    }
 
-        // Handle account changes
-        if (typeof window.ethereum !== 'undefined') {
-            window.ethereum.on('accountsChanged', async (accounts) => {
-                if (accounts.length === 0) {
-                    // User disconnected
-                    userAccount = null;
-                    signer = null;
-                    marketplaceContract = null;
-                    document.querySelector('.connect-wallet').textContent = 'Connect Wallet';
-                    document.getElementById('balanceSection').style.display = 'none';
-                } else {
-                    // User switched accounts
-                    await connectWallet();
-                }
-            });
+    // Wire UI
+    el('connectBtn').addEventListener('click', connect);
+    el('refreshBtn').addEventListener('click', refreshAll);
+    el('mintBtn').addEventListener('click', quickMint);
+    el('sellOpenBtn').addEventListener('click', ()=> toggleSell(true));
+    el('myListingsBtn').addEventListener('click', showMyListings);
+    el('createListingBtn').addEventListener('click', createListing);
 
-            window.ethereum.on('chainChanged', (chainId) => {
-                // Reload the page when chain changes
-                window.location.reload();
-            });
-        }
+    // Close modal on background click
+    el('sellModal').addEventListener('click', (e)=>{ if(e.target.id==='sellModal') toggleSell(false); });
 
-        // Add smooth scrolling
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
+    // Init read-only provider for non-connected users
+    (async ()=>{
+      readProvider = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID_DEC);
+      marketplaceRead  = new ethers.Contract(MARKETPLACE_ADDR, MARKETPLACE_ABI, readProvider);
+      mon20Read        = new ethers.Contract(MON20_ADDR, MON20_ABI, readProvider);
+      await refreshAll();
+    })();
 
-        // Add loading animation
-        function showLoading(elementId, message = 'Loading...') {
-            const element = document.getElementById(elementId);
-            if (element) {
-                element.innerHTML = `<div class="loading">${message}</div>`;
-            }
-        }
+    // React to wallet events
+    if (window.ethereum){
+      window.ethereum.on('accountsChanged', ()=> window.location.reload());
+      window.ethereum.on('chainChanged', ()=> window.location.reload());
+    }
 
-        // Format numbers with proper decimals
-        function formatNumber(num, decimals = 2) {
-            return Number(num).toLocaleString(undefined, {
-                minimumFractionDigits: decimals,
-                maximumFractionDigits: decimals
-            });
-        }
-
-        // Format address for display
-        function formatAddress(address) {
-            if (!address) return '';
-            return `${address.slice(0, 6)}...${address.slice(-4)}`;
-        }
-
-        // Add error handling for transactions
-        function handleTransactionError(error) {
-            console.error('Transaction error:', error);
-            
-            if (error.code === 4001) {
-                alert('Transaction cancelled by user');
-            } else if (error.code === -32603) {
-                alert('Transaction failed: Insufficient funds or contract error');
-            } else if (error.message.includes('insufficient funds')) {
-                alert('Insufficient MON balance for transaction');
-            } else if (error.message.includes('execution reverted')) {
-                alert('Transaction failed: Contract execution error');
-            } else {
-                alert('Transaction failed: ' + error.message);
-            }
-        }
-
-        // Enhanced buy function with better error handling
-        async function buyInscription(listingId, amount, totalPrice) {
-            if (!marketplaceContract || !signer) {
-                alert('Please connect your wallet first');
-                return;
-            }
-            
-            if (!confirm(`Buy ${formatNumber(amount, 0)} MONS for ${formatNumber(totalPrice, 6)} MON?`)) {
-                return;
-            }
-            
-            try {
-                // Check user's MON balance first
-                const balance = await provider.getBalance(userAccount);
-                const totalPriceWei = ethers.parseEther(totalPrice);
-                
-                if (balance < totalPriceWei) {
-                    alert('Insufficient MON balance for this purchase');
-                    return;
-                }
-                
-                const amountWei = ethers.parseEther(amount);
-                
-                // Estimate gas
-                const gasEstimate = await marketplaceContract.purchaseInscriptions.estimateGas(
-                    listingId, 
-                    amountWei,
-                    { value: totalPriceWei }
-                );
-                
-                const tx = await marketplaceContract.purchaseInscriptions(
-                    listingId, 
-                    amountWei,
-                    { 
-                        value: totalPriceWei,
-                        gasLimit: gasEstimate
-                    }
-                );
-                
-                alert('Transaction sent! Waiting for confirmation...');
-                console.log('Transaction hash:', tx.hash);
-                
-                const receipt = await tx.wait();
-                console.log('Transaction confirmed:', receipt);
-                
-                alert('Purchase successful!');
-                
-                // Reload data
-                await Promise.all([
-                    loadMarketplaceData(),
-                    loadUserBalance()
-                ]);
-                
-            } catch (error) {
-                handleTransactionError(error);
-            }
-        }
-
-        // Enhanced create listing function
-        async function createListing() {
-            if (!marketplaceContract || !signer) {
-                alert('Please connect your wallet first');
-                return;
-            }
-            
-            const ticker = document.getElementById('listingTicker').value;
-            const amount = document.getElementById('listingAmount').value;
-            const pricePerToken = document.getElementById('listingPrice').value;
-            
-            if (!amount || !pricePerToken || amount <= 0 || pricePerToken <= 0) {
-                alert('Please enter valid amount and price');
-                return;
-            }
-            
-            try {
-                // Check if user has enough MONS balance
-                let userBalance = window.userMonsBalance || 0;
-                const amountWei = ethers.parseEther(amount);
-                
-                // If we don't have stored balance, try to fetch it
-                if (!userBalance) {
-                    try {
-                        const readProvider = new ethers.JsonRpcProvider(MONAD_TESTNET.rpc);
-                        const readTokenContract = new ethers.Contract(TOKEN_ADDRESS, MON20_ABI, readProvider);
-                        
-                        try {
-                            userBalance = await readTokenContract.getBalance(userAccount, "MONS");
-                        } catch (e1) {
-                            try {
-                                userBalance = await readTokenContract.balances(userAccount, "MONS");
-                            } catch (e2) {
-                                userBalance = await marketplaceContract.balanceOf(userAccount, "MONS");
-                            }
-                        }
-                    } catch (e) {
-                        console.error('Could not check balance:', e);
-                    }
-                }
-                
-                if (userBalance > 0 && userBalance < amountWei) {
-                    const balanceFormatted = ethers.formatEther(userBalance);
-                    alert(`Insufficient MONS balance!\n\nYou have: ${balanceFormatted} MONS\nYou need: ${amount} MONS\n\nPlease reduce the amount or mint more MONS tokens.`);
-                    return;
-                }
-                
-                if (userBalance == 0) {
-                    alert('You have no MONS tokens to list!\n\nPlease mint some MONS tokens first from the inscription contract.');
-                    return;
-                }
-                
-                const priceWei = ethers.parseEther(pricePerToken);
-                
-                // Estimate gas
-                const gasEstimate = await marketplaceContract.createListing.estimateGas(
-                    ticker, 
-                    amountWei, 
-                    priceWei
-                );
-                
-                const tx = await marketplaceContract.createListing(
-                    ticker, 
-                    amountWei, 
-                    priceWei,
-                    { gasLimit: gasEstimate }
-                );
-                
-                alert('Transaction sent! Waiting for confirmation...');
-                console.log('Transaction hash:', tx.hash);
-                
-                const receipt = await tx.wait();
-                console.log('Transaction confirmed:', receipt);
-                
-                alert('Listing created successfully!');
-                
-                // Clear form
-                document.getElementById('listingAmount').value = '';
-                document.getElementById('listingPrice').value = '';
-                
-                // Reload data
-                await Promise.all([
-                    loadMarketplaceData(),
-                    loadUserBalance()
-                ]);
-                
-            } catch (error) {
-                handleTransactionError(error);
-            }
-        }
-
-        // Add real-time updates using events
-        function setupEventListeners() {
-            if (!marketplaceContract) return;
-            
-            try {
-                // Listen for new listings
-                marketplaceContract.on("ListingCreated", (listingId, seller, ticker, amount, pricePerToken) => {
-                    console.log('New listing created:', { listingId, seller, ticker, amount, pricePerToken });
-                    setTimeout(loadMarketplaceData, 2000); // Reload after 2 seconds
-                });
-                
-                // Listen for purchases
-                marketplaceContract.on("InscriptionsPurchased", (listingId, buyer, seller, ticker, amount, totalPrice, fee) => {
-                    console.log('Inscription purchased:', { listingId, buyer, seller, ticker, amount, totalPrice, fee });
-                    setTimeout(loadMarketplaceData, 2000);
-                    
-                    if (buyer.toLowerCase() === userAccount?.toLowerCase()) {
-                        setTimeout(loadUserBalance, 3000); // Update user balance
-                    }
-                });
-                
-            } catch (error) {
-                console.error('Error setting up event listeners:', error);
-            }
-        }
-
-        // Add mint info function
-        function openMintInfo() {
-            alert(`To mint MONS tokens:\n\n1. Go to MON-20 Contract: 0x07169f0F890C3595421512D98DC79b8bce6E5fA6\n2. Call mint() function with:\n   - tick: "MONS"\n   - amount: 1000 (or less)\n   - Send 0.001 MON as fee\n\n3. Wait for confirmation\n4. Refresh this page to see your balance\n\nMax per mint: 1000 MONS\nMint fee: 0.001 MON`);
-        }
-
-        // Enhanced wallet connection with event listeners
-        async function connectWallet() {
-            try {
-                if (!provider) {
-                    alert('Please install MetaMask or another Web3 wallet');
-                    return;
-                }
-
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-                signer = await provider.getSigner();
-                userAccount = await signer.getAddress();
-                
-                const network = await provider.getNetwork();
-                if (Number(network.chainId) !== MONAD_TESTNET.chainId) {
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: `0x${MONAD_TESTNET.chainId.toString(16)}` }],
-                        });
-                    } catch (switchError) {
-                        if (switchError.code === 4902) {
-                            await window.ethereum.request({
-                                method: 'wallet_addEthereumChain',
-                                params: [{
-                                    chainId: `0x${MONAD_TESTNET.chainId.toString(16)}`,
-                                    chainName: MONAD_TESTNET.name,
-                                    rpcUrls: [MONAD_TESTNET.rpc],
-                                    nativeCurrency: {
-                                        name: 'MON',
-                                        symbol: 'MON',
-                                        decimals: 18
-                                    }
-                                }]
-                            });
-                        }
-                    }
-                }
-                
-                marketplaceContract = new ethers.Contract(MARKETPLACE_ADDRESS, MARKETPLACE_ABI, signer);
-                
-                document.querySelector('.connect-wallet').textContent = formatAddress(userAccount);
-                
-                await loadUserBalance();
-                setupEventListeners();
-                
-                console.log('Wallet connected:', userAccount);
-            } catch (error) {
-                console.error('Error connecting wallet:', error);
-                alert('Error connecting wallet: ' + error.message);
-            }
-        }
-    </script>
+    // Expose for inline buttons
+    window.buy = buy;
+    window.cancel = cancel;
+    window.toggleSell = toggleSell;
+  })();
+  </script>
 </body>
 </html>
